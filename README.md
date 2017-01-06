@@ -23,7 +23,7 @@ A tRNAscan file for your species of interest. (eg. Genus_species_tRNAscan.txt)
 
 Schattner P, Brooks AN, Lowe TM (2005) The tRNAscan-SE, snoscan and snoGPS web servers for the detection of tRNAs and snoRNAs. Nucleic Acids Res 33(SUPPL. 2):686–689
 
-Command to run script:
+***Command to run script:***
 
 python Codon_bias_analysis.py Genus_species.fasta Genus_species_tRNAscan.txt
 
