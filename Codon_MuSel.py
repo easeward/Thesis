@@ -77,33 +77,35 @@ def import_sequence(CDS_file):
 	with open(CDS_file) as CDSfile:
 		for line in CDSfile:
 			line = str(line.rstrip().strip())
-			if line[0] == ">":
-				acc = line[len(species)+2:]
+			if line == "":
+				empty = 0
+			elif line[0] == ">":
+				acc = line[1:]
 			else:
-				line.upper()
-			if 'N' in line:
-				print "%s has an N in it so is being excluded from the analysis" %acc
-			elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
-				p = 1
-				for letter in line:
-					if p % 3 == 0:
-						p += 1
-						codon = codon + letter
-						if codon in codon_trans_standard:
-							codon_count[codon] = codon_count[codon] + 1
-							protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1 #print "%d %s %d %s" %(codon_count[codon], codon, protein_count[codon_trans_standard[codon]], codon_trans_standard[codon])
-						elif "N" in codon:
-							print "There is an N in sequence %s, that codon is being ignored "%(codon)
+				line = line.upper()
+				if 'N' in line:
+					print "%s has an N in it so is being excluded from the analysis" %acc
+				elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
+					p = 1
+					for letter in line:
+						if p % 3 == 0:
+							p += 1
+							codon = codon + letter
+							if codon in codon_trans_standard:
+								codon_count[codon] = codon_count[codon] + 1
+								protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1 #print "%d %s %d %s" %(codon_count[codon], codon, protein_count[codon_trans_standard[codon]], codon_trans_standard[codon])
+							elif "N" in codon:
+								print "There is an N in sequence %s, that codon is being ignored "%(codon)
+							else:
+								print "%s is not a standard codon and won't be counted" %codon
+							codon = ""
 						else:
-							print "%s is not a standard codon and won't be counted" %codon
-						codon = ""
-					else:
-						p += 1
-						codon = codon + letter
-			else:
-				f1=open(species+"_problems.txt", "a")
-				f1.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
-				f1.close()
+							p += 1
+							codon = codon + letter
+				else:
+					f1=open(species+"_problems.txt", "a")
+					f1.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
+					f1.close()
 	global relative_codon_use
 	relative_codon_use = {}
 	for codon in codon_trans_standard:
@@ -202,10 +204,14 @@ def per_gene_analysis(CDS_file, best_model):
 				for key in proteins:
 					protein_count[key] = 0;
 				codon = ""
+			if line == "":
+				empty = 0
 			else:
 				line.upper()
 			if 'N' in line:
 				print "%s has an N in it so is being excluded from the analysis" %acc
+			elif line == "":
+				empty = 0
 			elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
 				p = 1
 				for letter in line:
@@ -519,7 +525,7 @@ def get_tAI_values(input):
 			an = bits[5]
 			if "tRNA" in line or "---" in line:
 				line = line
-			elif "SeC" in line or an == '???' or "Pseudo" in line or bits[4] == 'Sup' or 'fMet' in line:
+			elif "SeC" in line or "Undet" in line or an == '???' or "Pseudo" in line or bits[4] == 'Sup' or 'fMet' in line:
 				f1=open("Problems_"+input, "a")
 				f1.write(line+" includes SeC or Sup or pseudo or fMet and is not used in this analysis.\n")
 				f1.close()
@@ -612,6 +618,8 @@ def run_pareto_optimisation():
 			sequence = str(sequence.rstrip().strip())
 			if sequence[0] == ">":
 				acc = sequence[len(species)+2:]
+			elif line == "":
+				empty = 0
 			else:
 				line.upper()
 				if codon_trans_standard[sequence[0:3]] == "M" and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
