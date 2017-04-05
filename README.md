@@ -1,5 +1,12 @@
-# Codon_bias
-This script provides a fast tool for analysing codon bias both at the genome-wide level and at the gene-level.
+# CodonMuSel
+CodonMuSel is a tool for analysing codon bias both at the genome-wide level and at the gene-level. It estimates 
+
+1) Estimates the strength of selection acting on nucleotide biosynthesis cost.
+2) Estimates the strength of selection acting on translational efficiency.
+3) Estimates the proportion of codon bias attributable to mutational processes.
+4) Determines the extent to which individual gene sequences are optimised for cost efficiency.
+5) Determines the extent to which individual gene sequences are optimised for translational efficiency.
+6) Determines the extent to which individual gene sequences are jointly optimised for both cost and translational efficiency.
 
 For more details please see:
 
@@ -7,7 +14,7 @@ Seward EA, Kelly S (2016) Dietary nitrogen alters codon bias and genome composit
 
 AND
 
-***New paper***
+Seward EA, Kelly S (2016) Dietary nitrogen alters codon bias and genome composition in parasitic microorganisms. Genome Biol 17(1):226.
 
 Input requirements:
 
