@@ -16,6 +16,7 @@ import numpy as np
 import random
 import string
 import os
+import re
 from scipy import stats
 
 command_line = sys.argv
@@ -83,8 +84,14 @@ def import_sequence(CDS_file):
 				acc = line[1:]
 			else:
 				line = line.upper()
-				if 'N' in line:
-					print "%s has an N in it so is being excluded from the analysis" %acc
+				temp = line.replace("A", "")
+				temp = temp.replace("T", "")
+				temp = temp.replace("C", "")
+				temp = temp.replace("G", "")
+				if len(temp) > 0:
+					f3=open(species+"_problems.txt", "a")
+					f3.write(acc+" contains letters that aren't ATCG so is being excluded from the analysis\n")
+					f3.close()
 				elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
 					p = 1
 					for letter in line:
@@ -194,7 +201,9 @@ def per_gene_analysis(CDS_file, best_model):
 			print "You really should have a tRNAscan file for better results\n"
 		for line in CDSfile:
 			line = str(line.rstrip().strip())
-			if line[0] == ">":
+			if line == "":
+				empty = 0
+			elif line[0] == ">":
 				acc = line[1:] #acc = line[len(species)+2:]
 				global codon_count
 				codon_count = {}
@@ -204,71 +213,73 @@ def per_gene_analysis(CDS_file, best_model):
 				for key in proteins:
 					protein_count[key] = 0;
 				codon = ""
-			if line == "":
-				empty = 0
 			else:
-				line.upper()
-			if 'N' in line:
-				print "%s has an N in it so is being excluded from the analysis" %acc
-			elif line == "":
-				empty = 0
-			elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
-				p = 1
-				for letter in line:
-					if p % 3 == 0:
-						p += 1
-						codon = codon + letter	
-						if codon in codon_trans_standard:
-							codon_count[codon] = codon_count[codon] + 1
-							protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1 #print "%d %s %d %s" %(codon_count[codon], codon, protein_count[codon_trans_standard[codon]], codon_trans_standard[codon])
-						elif "N" in codon:
-							print "There is an N in sequence %s, that codon is being ignored "%(codon)
+				line = line.upper()
+				temp = line.replace("A", "")
+				temp = temp.replace("T", "")
+				temp = temp.replace("C", "")
+				temp = temp.replace("G", "")
+				if len(temp) > 0:
+					f3=open(species+"_problems_ind_genes.txt", "a")
+					f3.write(acc+" contains letters that aren't ATCG so is being excluded from the analysis\n")
+					f3.close()
+				elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
+					p = 1
+					for letter in line:
+						if p % 3 == 0:
+							p += 1
+							codon = codon + letter	
+							if codon in codon_trans_standard:
+								codon_count[codon] = codon_count[codon] + 1
+								protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1 #print "%d %s %d %s" %(codon_count[codon], codon, protein_count[codon_trans_standard[codon]], codon_trans_standard[codon])
+							elif "N" in codon:
+								print "There is an N in sequence %s, that codon is being ignored "%(codon)
+							else:
+								print "%s is not a standard codon and won't be counted" %codon
+							codon = ""
 						else:
-							print "%s is not a standard codon and won't be counted" %codon
-						codon = ""
+							p += 1
+							codon = codon + letter
+					global relative_codon_use
+					relative_codon_use = {}
+					for codon in codon_trans_standard:
+						if codon_count[codon] != 0:
+							relative_codon_use[codon] = "%.4f" %(float(codon_count[codon])/protein_count[codon_trans_standard[codon]])
+						elif protein_count[codon_trans_standard[codon]] !=0:
+							relative_codon_use[codon] = 0
+					likelihood = float(0)
+					for codon in relative_codon_use:
+						probability = float(relative_codon_use[codon])
+						if probability == 0:
+							probability = 0.000000000001
+						probability = math.log(probability)
+						likelihood = likelihood + probability*codon_count[codon]
+					final_likelihood = "%.2f" %(likelihood)
+					#print final_likelihood
+					res_model, likelihood_model, r2_model = get_math_function(best_model, 0, 0, 0, 0)
+					if ('Mb' in best_model):
+						Mutation_bias = res_model[0]
 					else:
-						p += 1
-						codon = codon + letter
-				global relative_codon_use
-				relative_codon_use = {}
-				for codon in codon_trans_standard:
-					if codon_count[codon] != 0:
-						relative_codon_use[codon] = "%.4f" %(float(codon_count[codon])/protein_count[codon_trans_standard[codon]])
-					elif protein_count[codon_trans_standard[codon]] !=0:
-						relative_codon_use[codon] = 0
-				likelihood = float(0)
-				for codon in relative_codon_use:
-					probability = float(relative_codon_use[codon])
-					if probability == 0:
-						probability = 0.000000000001
-					probability = math.log(probability)
-					likelihood = likelihood + probability*codon_count[codon]
-				final_likelihood = "%.2f" %(likelihood)
-				#print final_likelihood
-				res_model, likelihood_model, r2_model = get_math_function(best_model, 0, 0, 0, 0)
-				if ('Mb' in best_model):
-					Mutation_bias = res_model[0]
+						res_model[0] = 0
+					if ('Sc' in best_model):
+						Nucleotide_cost = res_model[1]
+					else:
+						res_model[1] = 0
+					if ('St' in best_model):
+						Translational_efficiency = res_model[2]
+					else:
+						res_model[2] = 0
+					if fixed_Mb == 'moveable':
+						print "Mutaiton bias is not fixed for individual genes. I would not recommend this. add -fix_mb to end of command line to run with fixed Mb value\n"
+					else: 
+						res_model[0] = fixed_Mb
+					f1.write('\n'+acc+'\t')
+					out = str(likelihood_model)+"\t"+str(res_model[0])+"\t"+str(res_model[1])+"\t"+str(res_model[2])
+					f1.write(out)
 				else:
-					res_model[0] = 0
-				if ('Sc' in best_model):
-					Nucleotide_cost = res_model[1]
-				else:
-					res_model[1] = 0
-				if ('St' in best_model):
-					Translational_efficiency = res_model[2]
-				else:
-					res_model[2] = 0
-				if fixed_Mb == 'moveable':
-					print "Mutaiton bias is not fixed for individual genes. I would not recommend this. add -fix_mb to end of command line to run with fixed Mb value\n"
-				else: 
-					res_model[0] = fixed_Mb
-				f1.write('\n'+acc+'\t')
-				out = str(likelihood_model)+"\t"+str(res_model[0])+"\t"+str(res_model[1])+"\t"+str(res_model[2])
-				f1.write(out)
-			else:
-				f2=open("Problem_"+species+".txt", "a")
-				f2.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
-				f2.close()
+					f2=open("Problem_"+species+".txt", "a")
+					f2.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
+					f2.close()
 	f1.close()
 
 def get_math_function(model_type, start_Mb, start_Ns, start_Te, start_Es):
@@ -607,22 +618,30 @@ def pareto_frontier(Xs, Ys, maxX, maxY):
 	return p_frontX, p_frontY
 
 def run_pareto_optimisation():	
-	species = tSCAN_file
-	species = str(species[:len(species)-13])
+	species = CDS_file
+	species = str(species[:len(species)-6])
 	get_tAI_values(tSCAN_file)
-	f1=open(species+"_Pareto_optimisation_results.txt", "a")
+	f1=open(species+"_pareto_optimisation_results.txt", "a")
 	f1.write("Accession\t%Both_optimised\t%Cost_optimised\t%tAI_optimised\n")
 	f1.close()
-	with open(species+".fasta") as CDSfile:
+	with open(CDS_file) as CDSfile:
 		for sequence in CDSfile:
 			sequence = str(sequence.rstrip().strip())
-			if sequence[0] == ">":
-				acc = sequence[len(species)+2:]
-			elif line == "":
+			if sequence == "":
 				empty = 0
+			elif sequence[0] == ">":
+				acc = sequence[1:]
 			else:
-				line.upper()
-				if codon_trans_standard[sequence[0:3]] == "M" and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
+				sequence = sequence.upper()
+				temp = sequence.replace("A", "")
+				temp = temp.replace("T", "")
+				temp = temp.replace("C", "")
+				temp = temp.replace("G", "")
+				if len(temp) > 0:
+					f3=open(species+"_problems_pareto_optimisation.txt", "a")
+					f3.write(acc+" contains letters that aren't ATCG so is being excluded from the analysis\n")
+					f3.close()
+				elif codon_trans_standard[sequence[0:3]] == "M" and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
 					codon = ""
 					amino_seq = []
 					cost = 0
@@ -745,7 +764,7 @@ def run_pareto_optimisation():
 					Both_optimised = float(d4*100)/(d1 + d4)
 					Cost_optimised = float(d5*100)/(d2 + d5)
 					tAI_optimised = float(d6*100)/(d3 + d6)
-					f1=open(species+"_Pareto_optimisaiton_results.txt", "a")
+					f1=open(species+"_pareto_optimisation_results.txt", "a")
 					f1.write(acc+"\t"+str(Both_optimised)+"\t"+str(Cost_optimised)+"\t"+str(tAI_optimised)+"\n")
 					f1.close()
 				else:
