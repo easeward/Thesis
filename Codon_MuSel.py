@@ -56,11 +56,12 @@ elif codon_code_number == 5: # The Invertebrate Mitochondrial Code
 elif codon_code_number == 6: # The Ciliate, Dasycladacean and Hexamita Nuclear Code 
 	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TGA'], 'C' : ['TGT', 'TGC'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC', 'ATA'], 'K' : ['AAG', 'AAA'], 'L' : ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'M' : ['ATG'], 'N' : ['AAT', 'AAC'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG', 'TAA', 'TAG'], 'R' : ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG'], 'Y' : ['TAT', 'TAC']}
 	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'Q', 'TGA' : 'B', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'Q', 'TGG' : 'W', 'CTT' : 'L', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'L', 'CCC' : 'P', 'CAC' : 'H', 'CGC' : 'R', 'CTA' : 'L', 'CCA' : 'P', 'CAA' : 'Q', 'CGA' : 'R', 'CTG' : 'L', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'I', 'ACA' : 'T', 'AAA' : 'K', 'AGA' : 'R', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'R', 'GTT' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+alphabetic_codons = ['AAA', 'AAC', 'AAG', 'AAT', 'ACA', 'ACC', 'ACG', 'ACT', 'AGA', 'AGC', 'AGG', 'AGT', 'ATA', 'ATC', 'ATG', 'ATT', 'CAA', 'CAC', 'CAG', 'CAT', 'CCA', 'CCC', 'CCG', 'CCT', 'CGA', 'CGC', 'CGG', 'CGT', 'CTA', 'CTC', 'CTG', 'CTT', 'GAA', 'GAC', 'GAG', 'GAT', 'GCA', 'GCC', 'GCG', 'GCT', 'GGA', 'GGC', 'GGG', 'GGT', 'GTA', 'GTC', 'GTG', 'GTT', 'TAA', 'TAC', 'TAG', 'TAT', 'TCA', 'TCC', 'TCG', 'TCT', 'TGA', 'TGC', 'TGG', 'TGT', 'TTA', 'TTC', 'TTG', 'TTT']
 symbols = {'Ala': 'A', 'Cys' : 'C', 'Asp' : 'D', 'Glu':'E', 'Phe':'F', 'Gly':'G', 'His': 'H', 'Ile': 'I', 'Lys':'K' , 'Leu': 'L', 'Met': 'M', 'Asn':'N', 'Pro':'P', 'Gln':'Q', 'Arg': 'R', 'Ser':'S' , 'Thr':'T',  'Val':'V', 'Trp':'W', 'Tyr':'Y'}
 sij_values = {'AT' : 0, 'CG' : 0, 'GC' : 0, 'TA' : 0, 'TG' : 0.698, 'GT' : 0.6294, 'AG' : 1, 'CC' : 1, 'CT' : 1, 'GG' : 1, 'GA' : 1, 'TT' : 0.7, 'TC' : 0.95} #('AA' : 0.8773, 'CA' : 0.7309, 'AC' : 0.4211,)addressed in get_tAI  2014 Tuller et. al.#anticodon #codon
 GC_content = {'A' : 0, 'T' : 0, 'C' : 1, 'G' : 1}
 N_content = {'A' : 5, 'T' : 2, 'C' : 3, 'G' : 5} #N_content = {'A' : 1, 'T' : 0.4, 'C' : 0.6, 'G' : 1} #
-#En_content = {'A' : 0.899, 'T' : 0.571, 'C' : 0.671, 'G' : 0.867} #energy requirement of each nucleotide being synthesised in glucose molecules.
+En_content = {'A' : 0.899, 'T' : 0.571, 'C' : 0.671, 'G' : 0.867} #energy requirement of each nucleotide being synthesised in glucose molecules.
 bases = ['A', 'T', 'C', 'G']
 
 def import_sequence(CDS_file):
@@ -73,7 +74,7 @@ def import_sequence(CDS_file):
 	for key in proteins:
 		protein_count[key] = 0;
 	codon = ""
-	with open(file) as CDSfile:
+	with open(CDS_file) as CDSfile:
 		for line in CDSfile:
 			line = str(line.rstrip().strip())
 			if line[0] == ">":
@@ -98,7 +99,9 @@ def import_sequence(CDS_file):
 						p += 1
 						codon = codon + letter
 			else:
-				print "%s is either <30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis" %acc
+				f1=open(species+"_problems.txt", "a")
+				f1.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
+				f1.close()
 	global relative_codon_use
 	relative_codon_use = {}
 	for codon in codon_trans_standard:
@@ -116,11 +119,11 @@ def import_sequence(CDS_file):
 		log_likelihood = log_likelihood + probability*codon_count[codon]
 	final_log_likelihood = "%.2f" %(log_likelihood)
 	#Mutation_bias = Mb	Nitrogen Selection = Sc		Translational Efficiency = St		Energy selection = Es
-	if tSCAN_file = None:
-		Options = ['Mb', 'Sc']
-	else:
+	try:
 		get_tAI_values(tSCAN_file)
-		Options = ['Mb', 'Sc', 'St'] # 
+		Options = ['Mb', 'Sc', 'St']
+	except NameError:
+		Options = ['Mb', 'Sc']
 	#AIC = 2k - 2ln(L) # minimum AIC is best
 	best_log_likelihood = 10000000000000000000
 	AIC = 10000000000000000000
@@ -169,7 +172,7 @@ def import_sequence(CDS_file):
 		best_res[2] = 0
 	f1=open(species+"_results_"+best+".txt", "a")
 	f1.write("Log_likelihood\tAIC\tR2\tMutation_bias_Mb\tSelection_on_cost_Sc\tSelection_on_translational_efficiency_St\n")
-	out = final_log_likelihood+"\t"+str(best_log_likelihood)+"\t"+str(AIC)+"\t"+str(best_r2)+"\t"+str(best_res[0])+"\t"+str(best_res[1])+"\t"+str(best_res[2])
+	out = str(best_log_likelihood)+"\t"+str(AIC)+"\t"+str(best_r2)+"\t"+str(best_res[0])+"\t"+str(best_res[1])+"\t"+str(best_res[2])
 	f1.write(out)
 	f1.close()
 	return best, best_res[0]
@@ -252,8 +255,9 @@ def per_gene_analysis(CDS_file, best_model):
 				out = str(likelihood_model)+"\t"+str(r2_model)+"\t"+str(res_model[0])+"\t"+str(res_model[1])+"\t"+str(res_model[2])
 				f1.write(out)
 			else:
-				print "%s is either <30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis" %acc
-	
+				f2=open(species+"_problems.txt", "a")
+				f2.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
+				f2.close()
 	f1.close()
 
 def get_math_function(model_type, start_Mb, start_Ns, start_Te, start_Es):
@@ -504,7 +508,6 @@ def get_tAI_values(input):
 	anticodon_count = [[0 for antic in anticodons[p]] for p in proteins] #This assigns a matrix full of 0 for each protein and anticodon combination
 	with open(input) as tRNAscan:
 		species_name = str(input[:len(input)-13])
-		print species_name
 		for line in tRNAscan:
 			line = str(line.rstrip().strip())
 			bits = line.split()
@@ -512,7 +515,9 @@ def get_tAI_values(input):
 			if "tRNA" in line or "---" in line:
 				line = line
 			elif "SeC" in line or an == '???' or "Pseudo" in line or bits[4] == 'Sup' or 'fMet' in line:
-				print "I am not including SeC or Sup or pseudo finds in the analysis."
+				f1=open("Problems_"+input, "a")
+				f1.write(line+" includes SeC or Sup or pseudo or fMet and is not used in this analysis.\n")
+				f1.close()
 			else:
 				amino_a = symbols[bits[4]]
 				p_index = protein_index[amino_a]
@@ -595,14 +600,14 @@ def run_pareto_optimisation():
 	species = str(species[:len(species)-13])
 	get_tAI_values(tSCAN_file)
 	f1=open(species+"_Pareto_optimisation_results.txt", "a")
-		f1.write("Accession\t%Both_optimised\t%Cost_optimised\t%tAI_optimised\n")
+	f1.write("Accession\t%Both_optimised\t%Cost_optimised\t%tAI_optimised\n")
 	f1.close()
 	with open(species+".fasta") as CDSfile:
 		for sequence in CDSfile:
 			sequence = str(sequence.rstrip().strip())
 			if sequence[0] == ">":
 				acc = sequence[len(species)+2:]
-			else:
+			elif codon_trans_standard[sequence[0:3]] == "M" and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
 				codon = ""
 				amino_seq = []
 				cost = 0
@@ -611,7 +616,6 @@ def run_pareto_optimisation():
 				number = 0
 				options = []
 				column = 0
-			if codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
 				p = 1
 				for letter in sequence:
 					if p % 3 == 0:
@@ -726,11 +730,13 @@ def run_pareto_optimisation():
 				Both_optimised = float(d4*100)/(d1 + d4)
 				Cost_optimised = float(d5*100)/(d2 + d5)
 				tAI_optimised = float(d6*100)/(d3 + d6)
-				f1=open(species+"_Pareto_optimisaiton.txt", "a")
+				f1=open(species+"_Pareto_optimisaiton_results.txt", "a")
 				f1.write(acc+"\t"+str(Both_optimised)+"\t"+str(Cost_optimised)+"\t"+str(tAI_optimised)+"\n")
 				f1.close()
 			else:
-				print "%s is either <30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis" %acc
+				f1=open(species+"_problems_pareto_optimisation.txt", "a")
+				f1.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
+				f1.close()
 
 global fixed_Mb
 fixed_Mb = "moveable"
@@ -744,5 +750,5 @@ if "-ind" in sys.argv:
 		fixed_Mb = "moveable"
 	per_gene_analysis(CDS_file, model_to_use)
 if "-par" in sys.argv:
-	print "Running pareto optimisation on individual genes\n";
+	print "Running pareto optimisation on individual genes, takes ~ 1 hour for a bacterial species.\n";
 	run_pareto_optimisation()
