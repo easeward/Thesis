@@ -79,7 +79,9 @@ def import_sequence(CDS_file):
 			line = str(line.rstrip().strip())
 			if line[0] == ">":
 				acc = line[len(species)+2:]
-			elif 'N' in line:
+			else:
+				line.upper()
+			if 'N' in line:
 				print "%s has an N in it so is being excluded from the analysis" %acc
 			elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
 				p = 1
@@ -200,7 +202,9 @@ def per_gene_analysis(CDS_file, best_model):
 				for key in proteins:
 					protein_count[key] = 0;
 				codon = ""
-			elif 'N' in line:
+			else:
+				line.upper()
+			if 'N' in line:
 				print "%s has an N in it so is being excluded from the analysis" %acc
 			elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
 				p = 1
@@ -608,136 +612,138 @@ def run_pareto_optimisation():
 			sequence = str(sequence.rstrip().strip())
 			if sequence[0] == ">":
 				acc = sequence[len(species)+2:]
-			elif codon_trans_standard[sequence[0:3]] == "M" and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
-				codon = ""
-				amino_seq = []
-				cost = 0
-				translatability = 0
-				line = {}
-				number = 0
-				options = []
-				column = 0
-				p = 1
-				for letter in sequence:
-					if p % 3 == 0:
-						p += 1
-						codon = codon + letter
-						if codon in codon_trans_standard:
-							if codon_trans_standard[codon] != 'B':
-								amino_seq.append(codon_trans_standard[codon])
-								column += 1
-								cost = cost + N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]]
-								translatability = translatability + tAI_value[codon]
-								line[number] = proteins[codon_trans_standard[codon]]
-								options.append(len(line[number]))
-								number += 1
-						elif "N" in codon:
-							print "There is an N in sequence %s, that codon is being ignored "%(codon)
-						else:
-							print "%s is not a standard codon and won't be counted" %codon
-						codon = ""
-					else:
-						p += 1
-						codon = codon + letter
-				i = 0
-				cost_frontier = []
-				trans_frontier = []
-				while (i < len(line)):
-					opts = line[i]
-					cost_array = []
-					trans_array = []
-					for codon in opts:
-						cost_array.append(N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]])
-						trans_array.append(tAI_value[codon])
-					temp_frontier_cost = []
-					temp_frontier_trans = []
-					if len(cost_frontier) == 0:
-						temp_frontier_cost = cost_array
-						temp_frontier_trans = trans_array
-					else:
-						for costy in cost_frontier:
-							for extra_cost in cost_array:
-								temp_frontier_cost.append(costy+extra_cost)
-						for trans in trans_frontier:
-							for extra_trans in trans_array:
-								temp_frontier_trans.append(trans+extra_trans)
-					cost_frontier, trans_frontier = pareto_frontier(temp_frontier_cost, temp_frontier_trans, maxX = False, maxY = True)
-					i += 1
-				i = 0
-				cost_frontier = np.array(cost_frontier)
-				trans_frontier = np.array(trans_frontier)
-				min_cost = min(cost_frontier)
-				max_cost = max(cost_frontier)
-				min_trans = min(trans_frontier)
-				max_trans = max(trans_frontier)
-				cost_frontier_worst = []
-				trans_frontier_worst = []
-				while (i < len(line)):
-					opts = line[i]
-					cost_array = []
-					trans_array = []
-					for codon in opts:
-						cost_array.append(N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]])
-						trans_array.append(tAI_value[codon])
-					temp_frontier_cost = []
-					temp_frontier_trans = []
-					if len(cost_frontier_worst) == 0:
-						temp_frontier_cost = cost_array
-						temp_frontier_trans = trans_array
-					else:
-						for costy in cost_frontier_worst:
-							for extra_cost in cost_array:
-								temp_frontier_cost.append(costy+extra_cost)
-						for trans in trans_frontier_worst:
-							for extra_trans in trans_array:
-								temp_frontier_trans.append(trans+extra_trans)
-					cost_frontier_worst, trans_frontier_worst = pareto_frontier(temp_frontier_cost, temp_frontier_trans, maxX = True, maxY = False)
-					i += 1
-				cost_frontier_worst = np.array(cost_frontier_worst)
-				trans_frontier_worst = np.array(trans_frontier_worst)
-				if min_cost > min(cost_frontier_worst):
-					min_cost = min(cost_frontier_worst)
-				if max_cost < max(cost_frontier_worst):
-					max_cost = max(cost_frontier_worst)
-				if min_trans > min(trans_frontier_worst):
-					min_trans = min(trans_frontier_worst)
-				if max_trans < max(trans_frontier_worst):
-					max_trans = max(trans_frontier_worst)
-				cost_frontier_worst = (cost_frontier_worst - min_cost)/float(max_cost - min_cost)
-				trans_frontier_worst = (trans_frontier_worst - min_trans)/float(max_trans - min_trans)
-				cost_frontier = (cost_frontier - min_cost)/float(max_cost - min_cost)
-				trans_frontier = (trans_frontier - min_trans)/float(max_trans - min_trans)
-				cost = float(cost - min_cost)/(max_cost - min_cost)
-				translatability = float(translatability - min_trans)/(max_trans - min_trans)
-				
-				print acc
-				i = 0
-				distance = []
-				while (i < len(cost_frontier)):
-					distance.append(math.sqrt((cost - cost_frontier[i])*(cost - cost_frontier[i]) + (translatability  - trans_frontier[i])*(translatability  - trans_frontier[i])))
-					i += 1
-				d1 = min(distance)
-				d2 = (math.sqrt((cost - cost_frontier[0])*(cost - cost_frontier[0]) + (translatability - trans_frontier[0])*(translatability - trans_frontier[0])))
-				d3 = (math.sqrt((cost - cost_frontier[-1])*(cost - cost_frontier[-1]) + (translatability - trans_frontier[-1])*(translatability - trans_frontier[-1])))
-				i = 0
-				i = 0
-				distance = []
-				while (i < len(cost_frontier_worst)):
-					distance.append(math.sqrt((cost - cost_frontier_worst[i])*(cost - cost_frontier_worst[i]) + (translatability  - trans_frontier_worst[i])*(translatability  - trans_frontier_worst[i])))
-					i += 1
-				d4 = min(distance)
-				d5 = (math.sqrt((cost - cost_frontier_worst[-1])*(cost - cost_frontier_worst[-1]) + (translatability - trans_frontier_worst[-1])*(translatability - trans_frontier_worst[-1])))
-				d6 = (math.sqrt((cost - cost_frontier_worst[0])*(cost - cost_frontier_worst[0]) + (translatability - trans_frontier_worst[0])*(translatability - trans_frontier_worst[0])))
-				Both_optimised = float(d4*100)/(d1 + d4)
-				Cost_optimised = float(d5*100)/(d2 + d5)
-				tAI_optimised = float(d6*100)/(d3 + d6)
-				f1=open(species+"_Pareto_optimisaiton_results.txt", "a")
-				f1.write(acc+"\t"+str(Both_optimised)+"\t"+str(Cost_optimised)+"\t"+str(tAI_optimised)+"\n")
-				f1.close()
 			else:
-				f1=open(species+"_problems_pareto_optimisation.txt", "a")
-				f1.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
-				f1.close()
+				line.upper()
+				if codon_trans_standard[sequence[0:3]] == "M" and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
+					codon = ""
+					amino_seq = []
+					cost = 0
+					translatability = 0
+					line = {}
+					number = 0
+					options = []
+					column = 0
+					p = 1
+					for letter in sequence:
+						if p % 3 == 0:
+							p += 1
+							codon = codon + letter
+							if codon in codon_trans_standard:
+								if codon_trans_standard[codon] != 'B':
+									amino_seq.append(codon_trans_standard[codon])
+									column += 1
+									cost = cost + N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]]
+									translatability = translatability + tAI_value[codon]
+									line[number] = proteins[codon_trans_standard[codon]]
+									options.append(len(line[number]))
+									number += 1
+							elif "N" in codon:
+								print "There is an N in sequence %s, that codon is being ignored "%(codon)
+							else:
+								print "%s is not a standard codon and won't be counted" %codon
+							codon = ""
+						else:
+							p += 1
+							codon = codon + letter
+					i = 0
+					cost_frontier = []
+					trans_frontier = []
+					while (i < len(line)):
+						opts = line[i]
+						cost_array = []
+						trans_array = []
+						for codon in opts:
+							cost_array.append(N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]])
+							trans_array.append(tAI_value[codon])
+						temp_frontier_cost = []
+						temp_frontier_trans = []
+						if len(cost_frontier) == 0:
+							temp_frontier_cost = cost_array
+							temp_frontier_trans = trans_array
+						else:
+							for costy in cost_frontier:
+								for extra_cost in cost_array:
+									temp_frontier_cost.append(costy+extra_cost)
+							for trans in trans_frontier:
+								for extra_trans in trans_array:
+									temp_frontier_trans.append(trans+extra_trans)
+						cost_frontier, trans_frontier = pareto_frontier(temp_frontier_cost, temp_frontier_trans, maxX = False, maxY = True)
+						i += 1
+					i = 0
+					cost_frontier = np.array(cost_frontier)
+					trans_frontier = np.array(trans_frontier)
+					min_cost = min(cost_frontier)
+					max_cost = max(cost_frontier)
+					min_trans = min(trans_frontier)
+					max_trans = max(trans_frontier)
+					cost_frontier_worst = []
+					trans_frontier_worst = []
+					while (i < len(line)):
+						opts = line[i]
+						cost_array = []
+						trans_array = []
+						for codon in opts:
+							cost_array.append(N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]])
+							trans_array.append(tAI_value[codon])
+						temp_frontier_cost = []
+						temp_frontier_trans = []
+						if len(cost_frontier_worst) == 0:
+							temp_frontier_cost = cost_array
+							temp_frontier_trans = trans_array
+						else:
+							for costy in cost_frontier_worst:
+								for extra_cost in cost_array:
+									temp_frontier_cost.append(costy+extra_cost)
+							for trans in trans_frontier_worst:
+								for extra_trans in trans_array:
+									temp_frontier_trans.append(trans+extra_trans)
+						cost_frontier_worst, trans_frontier_worst = pareto_frontier(temp_frontier_cost, temp_frontier_trans, maxX = True, maxY = False)
+						i += 1
+					cost_frontier_worst = np.array(cost_frontier_worst)
+					trans_frontier_worst = np.array(trans_frontier_worst)
+					if min_cost > min(cost_frontier_worst):
+						min_cost = min(cost_frontier_worst)
+					if max_cost < max(cost_frontier_worst):
+						max_cost = max(cost_frontier_worst)
+					if min_trans > min(trans_frontier_worst):
+						min_trans = min(trans_frontier_worst)
+					if max_trans < max(trans_frontier_worst):
+						max_trans = max(trans_frontier_worst)
+					cost_frontier_worst = (cost_frontier_worst - min_cost)/float(max_cost - min_cost)
+					trans_frontier_worst = (trans_frontier_worst - min_trans)/float(max_trans - min_trans)
+					cost_frontier = (cost_frontier - min_cost)/float(max_cost - min_cost)
+					trans_frontier = (trans_frontier - min_trans)/float(max_trans - min_trans)
+					cost = float(cost - min_cost)/(max_cost - min_cost)
+					translatability = float(translatability - min_trans)/(max_trans - min_trans)
+					
+					print acc
+					i = 0
+					distance = []
+					while (i < len(cost_frontier)):
+						distance.append(math.sqrt((cost - cost_frontier[i])*(cost - cost_frontier[i]) + (translatability  - trans_frontier[i])*(translatability  - trans_frontier[i])))
+						i += 1
+					d1 = min(distance)
+					d2 = (math.sqrt((cost - cost_frontier[0])*(cost - cost_frontier[0]) + (translatability - trans_frontier[0])*(translatability - trans_frontier[0])))
+					d3 = (math.sqrt((cost - cost_frontier[-1])*(cost - cost_frontier[-1]) + (translatability - trans_frontier[-1])*(translatability - trans_frontier[-1])))
+					i = 0
+					i = 0
+					distance = []
+					while (i < len(cost_frontier_worst)):
+						distance.append(math.sqrt((cost - cost_frontier_worst[i])*(cost - cost_frontier_worst[i]) + (translatability  - trans_frontier_worst[i])*(translatability  - trans_frontier_worst[i])))
+						i += 1
+					d4 = min(distance)
+					d5 = (math.sqrt((cost - cost_frontier_worst[-1])*(cost - cost_frontier_worst[-1]) + (translatability - trans_frontier_worst[-1])*(translatability - trans_frontier_worst[-1])))
+					d6 = (math.sqrt((cost - cost_frontier_worst[0])*(cost - cost_frontier_worst[0]) + (translatability - trans_frontier_worst[0])*(translatability - trans_frontier_worst[0])))
+					Both_optimised = float(d4*100)/(d1 + d4)
+					Cost_optimised = float(d5*100)/(d2 + d5)
+					tAI_optimised = float(d6*100)/(d3 + d6)
+					f1=open(species+"_Pareto_optimisaiton_results.txt", "a")
+					f1.write(acc+"\t"+str(Both_optimised)+"\t"+str(Cost_optimised)+"\t"+str(tAI_optimised)+"\n")
+					f1.close()
+				else:
+					f1=open(species+"_problems_pareto_optimisation.txt", "a")
+					f1.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
+					f1.close()
 
 global fixed_Mb
 fixed_Mb = "moveable"
