@@ -4,7 +4,9 @@ This script provides a fast tool for analysing codon bias both at the genome-wid
 For more details please see:
 
 Seward EA, Kelly S (2016) Dietary nitrogen alters codon bias and genome composition in parasitic microorganisms. Genome Biol 17(1):226.
+
 AND
+
 ***New paper***
 
 Input requirements:
@@ -39,4 +41,5 @@ Species_results_file_individual_genes_Bestmodel_parameters.txt
 Species_Paerto_optimisation_results.txt
 
 An example dataset is provided. To run it for this set use the command:
+
 python Codon_MuSel.py -f Mycoplasma_pneumoniae.fasta -tscan Mycoplasma_pneumoniae_tRNAscan.txt -tc 1 -ind -fix_mb -par
