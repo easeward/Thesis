@@ -178,19 +178,20 @@ def import_sequence(CDS_file):
 	return best, best_res[0]
 	
 def per_gene_analysis(CDS_file, best_model):
-	species = str(file[:len(file)-6]) #This assumes your file is Species.fasta
+	species = str(CDS_file[:len(CDS_file)-6]) #This assumes your file is Species.fasta
 	results_name = species+"_results_file_individual_genes_"+best_model+".txt"
 	f1=open(results_name, "a")
-	header = "Accession\tLog_likelihood\tAIC\tr2\tMb\tSc\tSt"
+	header = "Accession\tLog_likelihood\tMb\tSc\tSt"
 	f1.write(header)
-	with open(file) as CDSfile:
-		if tSCAN_file != None:
+	with open(CDS_file) as CDSfile:
+		try:
 			get_tAI_values(tSCAN_file)
+		except NameError:
+			print "You really should have a tRNAscan file for better results\n"
 		for line in CDSfile:
 			line = str(line.rstrip().strip())
 			if line[0] == ">":
 				acc = line[1:] #acc = line[len(species)+2:]
-				f1.write('\n'+acc+'\t')
 				global codon_count
 				codon_count = {}
 				protein_count = {}
@@ -233,29 +234,29 @@ def per_gene_analysis(CDS_file, best_model):
 					probability = math.log(probability)
 					likelihood = likelihood + probability*codon_count[codon]
 				final_likelihood = "%.2f" %(likelihood)
-				print final_likelihood
+				#print final_likelihood
 				res_model, likelihood_model, r2_model = get_math_function(best_model, 0, 0, 0, 0)
-				if ('Mb' in best):
+				if ('Mb' in best_model):
 					Mutation_bias = res_model[0]
 				else:
 					res_model[0] = 0
-				if ('Sc' in best):
+				if ('Sc' in best_model):
 					Nucleotide_cost = res_model[1]
 				else:
 					res_model[1] = 0
-				if ('St' in best):
+				if ('St' in best_model):
 					Translational_efficiency = res_model[2]
 				else:
 					res_model[2] = 0
-				print fixed_Mb
 				if fixed_Mb == 'moveable':
-					print "Mutaiton bias is not fixed for individual genes. I would not recommend this.\n"
+					print "Mutaiton bias is not fixed for individual genes. I would not recommend this. add -fix_mb to end of command line to run with fixed Mb value\n"
 				else: 
 					res_model[0] = fixed_Mb
-				out = str(likelihood_model)+"\t"+str(r2_model)+"\t"+str(res_model[0])+"\t"+str(res_model[1])+"\t"+str(res_model[2])
+				f1.write('\n'+acc+'\t')
+				out = str(likelihood_model)+"\t"+str(res_model[0])+"\t"+str(res_model[1])+"\t"+str(res_model[2])
 				f1.write(out)
 			else:
-				f2=open(species+"_problems.txt", "a")
+				f2=open("Problem_"+species+".txt", "a")
 				f2.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
 				f2.close()
 	f1.close()
