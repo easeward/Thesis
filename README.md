@@ -26,7 +26,7 @@ The **_CodonMuSel_** implementation of the SK model was first published in:
 
 ## Running _CodonMuSel_
 
-`python CodonMuSel.py [OPTIONS] -f \<SEQUENCE FILE\> -tscan \<tRNAscan FILE\>'
+`python CodonMuSel.py [OPTIONS] -f \<SEQUENCE FILE\> -tscan \<tRNAscan FILE\>`
 
 	-f <FILE>	A FASTA file of protein coding nucleotide seqeunces
 	-tscan <FILE>	A tRNA copy number file produced by tRNAscan
