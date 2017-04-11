@@ -49,6 +49,7 @@ Schattner P, Brooks AN, Lowe TM (2005) The tRNAscan-SE, snoscan and snoGPS web s
 
 
 ***Example Dataset:***
-An example dataset is provided. To run it for this set use the command:
+
+An example dataset is provided. To run CodonMuSel on this dataset execute the following command
 
 python Codon_MuSel.py -f Mycoplasma_pneumoniae.fasta -tscan Mycoplasma_pneumoniae_tRNAscan.txt -tc 1 -ind -fix_mb -par
