@@ -1,14 +1,17 @@
 # CodonMuSel
-CodonMuSel is a method for analysing the factors that affect codon bias both at the genome-wide and individual gene-level. It estimates 
+**CodonMuSel** is a method for analysing the factors that affect codon bias both at the genome-wide and individual gene-level. 
 
-1) Estimates the strength of selection acting on nucleotide biosynthesis cost.
-2) Estimates the strength of selection acting on translational efficiency.
-3) Estimates the proportion of codon bias attributable to mutational processes.
-4) Determines the extent to which individual gene sequences are optimised for cost efficiency.
-5) Determines the extent to which individual gene sequences are optimised for translational efficiency.
-6) Determines the extent to which individual gene sequences are jointly optimised for both cost and translational efficiency.
+**CodonMuSel** estimates
+1) The strength of selection acting on nucleotide biosynthesis cost.
+2) The strength of selection acting on translational efficiency.
+3) The proportion of codon bias attributable to mutational processes.
 
-CodonMuSel implements the SK model for jointly infering the impact on **Codon** bias of **Mu**tation and **Sel**ection acting on nucleotide cost and tranlsational efficiency. The SK model was first described in:
+**CodonMuSel** determines the extent to which individual gene sequences are
+1) Optimised for cost efficiency.
+2) Optimised for translational efficiency.
+3) Jointly optimised for both cost and translational efficiency.
+
+CodonMuSel implements the SK model for infering the impact on **_Codon_** bias of **_Mu_**tation and **_Sel_**ection acting on nucleotide cost and tranlsational efficiency. The SK model was first described in:
 
 **Seward EA, Kelly S (2016)** Dietary nitrogen alters codon bias and genome composition in parasitic microorganisms. **_Genome Biology_** 17(1):226.
 
