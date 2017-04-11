@@ -21,12 +21,12 @@ Seward EA, Kelly S (in prep.) The evolutionary economics of a gene, balancing th
 
 python CodonMuSel.py [OPTIONS] -f \<SEQUENCE FILE\> -tscan \<tRNAscan FILE\>
 
-	-f	A FASTA file of protein coding nucleotide seqeunces
-	-tscan	A tRNA copy number file produced by tRNAscan
-	-tc	The NCBI genetic code identifier goo.gl/ByQOau (The Standard Code = 1)
-	-ind	Analysed individual genes in adition to a genomewide analysis
-	-fix_mb	Fix mutation bias to value obtained from genome-wide analysis when analysing individual genes
-	-par 	Determine the extent to which individual genes have been optimised for cost and translational efficiency
+	-f <FILE>	A FASTA file of protein coding nucleotide seqeunces
+	-tscan <FILE>	A tRNA copy number file produced by tRNAscan
+	-tc <INT>	The NCBI genetic code identifier goo.gl/ByQOau (The Standard Code = 1)
+	-ind		Analysed individual genes in adition to a genomewide analysis
+	-fix_mb		Fix mutation bias to value obtained from genome-wide analysis when analysing individual genes
+	-par 		Determine the cost and efficiency optimality of individual genes
 
 ***Input Files:***
 
