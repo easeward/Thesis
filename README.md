@@ -19,7 +19,7 @@ Seward EA, Kelly S (in prep.) The evolutionary economics of a gene, balancing th
 
 ***Running CodonMuSel:***
 
-python CodonMuSel.py [OPTIONS] -f \<SEQUENCE FILE\> -tscan \tRNAscan FILE\>
+python CodonMuSel.py [OPTIONS] -f \<SEQUENCE FILE\> -tscan \<tRNAscan FILE\>
 
 	-f	A FASTA file of protein coding nucleotide seqeunces
 	-tscan	A tRNA copy number file produced by tRNAscan
