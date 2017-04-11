@@ -25,7 +25,7 @@ python CodonMuSel.py [OPTIONS] -f \<SEQUENCE FILE\> -tscan \<tRNAscan FILE\>
 	-tscan <FILE>	A tRNA copy number file produced by tRNAscan
 	-tc <INT>	The NCBI genetic code identifier goo.gl/ByQOau (The Standard Code = 1)
 	-ind		Analysed individual genes in adition to a genomewide analysis
-	-fix_mb		Fix mutation bias to value obtained from genome-wide analysis when analysing individual genes
+	-fix_mb		Fix mutation bias genome-wide value when analysing individual genes
 	-par 		Determine the cost and efficiency optimality of individual genes
 
 ***Input Files:***
