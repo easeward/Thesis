@@ -24,8 +24,19 @@ if "-f" in sys.argv:
 	fasta_index = command_line.index("-f") + 1
 	CDS_file = sys.argv[fasta_index]
 else:
-	print "Please run command in the following format:\npython Codon_MuSel.py -f Genus_species.fasta -tscan Genus_species_tRNAscan.txt -tc 1 -ind -fix_mb -par\n"
-	print "Where -f is the fasta file of DNA sequences, -tscan is the species tRNAscan file, -tc is the translation code you want (standard = 1)\n -ind is if you want to run the script on individual sequences, -fix_mb is to fix the mutation bias when running on individual species\n-par is to find the pareto optima of individual genes considering cost and translational efficiency\n";
+	print "\n\t\tCodonMusel version 0.1.0\n"
+	print "This software is distributed under the Univeristy of Oxford Academic Use\nLicence. For details please see the License.md that came with this software.\n"
+	print "Usage:\npython CodonMuSel.py [options] -f <sequence file> -tscan <tRNAscan file>\n"	
+	print "Options:"
+	print "  -f <FILE>     A FASTA file of protein coding nucleotide seqeunces"
+	print "  -tscan <FILE> A tRNA copy number file produced by tRNAscan"
+	print "  -tc <INT>     The NCBI genetic code identifier goo.gl/ByQOau (Default = 1)"
+	print "  -ind          Analysed individual genes in adition to a genomewide analysis"
+	print "  -fix_mb       Fix mutation bias to genome-wide value for individual genes"
+	print "  -par          Determine cost and efficiency optimality of individual genes\n"
+	print "Citation:";
+	print "When publishing work that uses CodonMuSel please cite:";
+	print "Seward EA and Kelly S (2016) Genome Biology 17(1):226\n";
 	exit()
 if "-tscan" in sys.argv:
 	tscan_index = command_line.index("-tscan") + 1
