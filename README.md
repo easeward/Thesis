@@ -30,9 +30,9 @@ The **_CodonMuSel_** implementation of the SK model was first published in:
 
 	-f <FILE>	A FASTA file of protein coding nucleotide seqeunces
 	-tscan <FILE>	A tRNA copy number file produced by tRNAscan
-	-tc <INT>	The NCBI genetic code identifier goo.gl/ByQOau (The Standard Code = 1)
-	-ind		Analysed individual genes in adition to a genomewide analysis
-	-fix_mb		Fix mutation bias to genome-wide value when analysing individual genes
+	-tc <INT>	The NCBI genetic code identifier goo.gl/ByQOau (Default = 1)
+	-ind		Analyse individual genes in adition to a genomewide analysis
+	-fix_mb		Fix mutation bias to genome-wide for individual genes
 	-par 		Determine the cost and efficiency optimality of individual genes
 
 ## Input Files
