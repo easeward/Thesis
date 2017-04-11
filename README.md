@@ -11,6 +11,7 @@
 2) Optimised for translational efficiency.
 3) Jointly optimised for both cost and translational efficiency.
 
+## How _CodonMusel_ works
 **_CodonMuSel_** implements the SK model for infering the impact on **_Codon_** bias of **_Mu_**tation and **_Sel_**ection acting on nucleotide cost and tranlsational efficiency. The SK model was first described in:
 
 **Seward EA, Kelly S (2016)** Dietary nitrogen alters codon bias and genome composition in parasitic microorganisms. **_Genome Biology_** 17(1):226.
