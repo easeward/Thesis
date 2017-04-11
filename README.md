@@ -20,6 +20,10 @@ The **_CodonMuSel_** implementation of the SK model was first published in:
 
 **Seward EA, Kelly S (in prep.)** The evolutionary economics of a gene, balancing the cost and efficiency of protein production.
 
+## Installing _CodonMuSel_
+**_CodonMuSel_** is written in python and requires **scipy**. Up-to-date instructions on how to install **scipy** are provided here: http://www.scipy.org/install.html. Once **scipy** is installed the **_CodonMuSel_** source code can be downloaded from this repositry and executed directly as described below.
+
+
 ## Running _CodonMuSel_
 
 `python CodonMuSel.py [OPTIONS] -f \<SEQUENCE FILE\> -tscan \<tRNAscan FILE\>'
