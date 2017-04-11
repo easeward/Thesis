@@ -15,13 +15,13 @@
 
 **Seward EA, Kelly S (2016)** Dietary nitrogen alters codon bias and genome composition in parasitic microorganisms. **_Genome Biology_** 17(1):226.
 
-This implementation of the SK model was first published in:
+The **_CodonMuSel_** implementation of the SK model was first published in:
 
 **Seward EA, Kelly S (in prep.)** The evolutionary economics of a gene, balancing the cost and efficiency of protein production.
 
 ## Running _CodonMuSel_:
 
-python CodonMuSel.py [OPTIONS] -f \<SEQUENCE FILE\> -tscan \<tRNAscan FILE\>
+`python CodonMuSel.py [OPTIONS] -f \<SEQUENCE FILE\> -tscan \<tRNAscan FILE\>`
 
 	-f <FILE>	A FASTA file of protein coding nucleotide seqeunces
 	-tscan <FILE>	A tRNA copy number file produced by tRNAscan
@@ -58,4 +58,4 @@ Schattner P, Brooks AN, Lowe TM (2005) The tRNAscan-SE, snoscan and snoGPS web s
 
 An example dataset is provided. To run CodonMuSel on this dataset execute the following command
 
-python Codon_MuSel.py -f Mycoplasma_pneumoniae.fasta -tscan Mycoplasma_pneumoniae_tRNAscan.txt -tc 1 -ind -fix_mb -par
+`python Codon_MuSel.py -f Mycoplasma_pneumoniae.fasta -tscan Mycoplasma_pneumoniae_tRNAscan.txt -tc 1 -ind -fix_mb -par`
