@@ -29,6 +29,7 @@ python CodonMuSel.py [OPTIONS] -f <SEQUENCE FILE> -tscan <tRNAscan FILE>
 	-par 	Determine the extent to which individual genes have been optimised for cost and translational efficiency
 
 ***Input Files:***
+
 To run a complete CodonMuSel analysis requires two input files
 
 1) A FASTA file containing nucleotide sequences for protein coding genes
