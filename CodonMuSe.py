@@ -220,7 +220,7 @@ def Genome_wide_analysis(CDS_file):
 	f1.close()
 	f2.close()
 	print "\n%d Sequences containing %d codons were analysed\n%d Sequences excluded (details in *_excluded_sequences.txt)" %(sequence_count, total_codons, bad_sequence_count)
-	print "\n%d tRNAs were used\n%d tRNAs excluded (details in *_tRNAscan_errors.txt)" %(tRNA_count, bad_tRNAs)
+	print "\n%d tRNAs were used\n%d tRNAs excluded (details in *_tRNAscan_errors.txt)\n" %(tRNA_count, bad_tRNAs)
 	print "Results Summary:\nLn_L = %d\nAIC =\t%d\nR2 =\t%s\nMb =\t%s\nSc =\t%s\nSt =\t%s\nBest fitting model =%s\n" %(best_log_likelihood, AIC, str(best_r2), str(best_res[0]), str(best_res[1]), str(best_res[2]), model_used)
 	return best, best_res[0]
 	
