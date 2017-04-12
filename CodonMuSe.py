@@ -25,8 +25,10 @@ if "-f" in sys.argv:
 	CDS_file = sys.argv[fasta_index]
 	global species
 	species, extention = os.path.splitext(CDS_file)
+	print "\n\t\tCodonMuse version 0.1.0\n"
+	print "This software is distributed under the Univeristy of Oxford Academic Use\nLicence. For details please see the License.md that came with this software.\n"
 else:
-	print "\n\t\tCodonMusel version 0.1.0\n"
+	print "\n\t\tCodonMuse version 0.1.0\n"
 	print "This software is distributed under the Univeristy of Oxford Academic Use\nLicence. For details please see the License.md that came with this software.\n"
 	print "Usage:\npython CodonMuSe.py [options] -f <sequence file> -tscan <tRNAscan file>\n"	
 	print "Options:"
@@ -35,10 +37,14 @@ else:
 	print "  -tc <INT>     The NCBI genetic code identifier goo.gl/ByQOau (Default = 1)"
 	print "  -ind          Analysed individual genes in adition to a genomewide analysis"
 	print "  -fix_mb       Fix mutation bias to genome-wide value for individual genes"
-	print "  -par          Determine cost and efficiency optimality of individual genes\n"
+	print "  -par          Determine cost and efficiency optimality of individual genes"
+	print "  -m <MODEL>    Fix model parameters (Default = find best model using AIC)\n"
 	print "Citation:";
-	print "When publishing work that uses CodonMuSe please cite:";
-	print "Seward EA and Kelly S (2016) Genome Biology 17(1):226\n";
+	print "CodonMuSe (1) implements the SK model (2)."
+	print "When publishing work that uses CodonMuSe please cite both:"
+	print "(1) Seward EA and Kelly S (2017) bioRxiv doi.org/XX.XXXX/XXXXXX"
+	print "(2) Seward EA and Kelly S (2016) Genome Biology 17(1):226\n"
+
 	exit()
 if "-tscan" in sys.argv:
 	tscan_index = command_line.index("-tscan") + 1
@@ -51,25 +57,48 @@ if "-tc" in sys.argv:
 else:
 	print "\nYou haven't specified a translation table from 1-6 so the standard code (1) will be used\n";
 	codon_code_number = 1
+if "-m" in sys.argv:
+	model_index = command_line.index("-m") + 1
+	model_fix = sys.argv[model_index]
+else:
+	model_fix = "find"
 complementary_nuc = { 'A' : 'T', 'T' : 'A', 'C' :'G', 'G' : 'C'}
 if codon_code_number == 1: # The standard code
 	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TAA', 'TGA', 'TAG'], 'C' : ['TGT', 'TGC'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC', 'ATA'], 'K' : ['AAG', 'AAA'], 'L' : ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'M' : ['ATG'], 'N' : ['AAT', 'AAC'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG'], 'R' : ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG'], 'Y' : ['TAT', 'TAC']}
 	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'B', 'TGA' : 'B', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'B', 'TGG' : 'W', 'CTT' : 'L', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'L', 'CCC' : 'P', 'CAC' : 'H', 'CGC' : 'R', 'CTA' : 'L', 'CCA' : 'P', 'CAA' : 'Q', 'CGA' : 'R', 'CTG' : 'L', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'I', 'ACA' : 'T', 'AAA' : 'K', 'AGA' : 'R', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'R', 'GTT' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+	start_codons = ['ATG', 'CTG', 'TTG']
 elif codon_code_number == 2: # The vertebrate mitochondrial code
 	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TAA', 'TAG', 'AGA', 'AGG'], 'C' : ['TGT', 'TGC'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC'], 'K' : ['AAG', 'AAA'], 'L' : ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'M' : ['ATG', 'ATA'], 'N' : ['AAT', 'AAC'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG'], 'R' : ['CGT', 'CGC', 'CGA', 'CGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG' , 'TGA'], 'Y' : ['TAT', 'TAC']}
 	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'B', 'TGA' : 'W', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'B', 'TGG' : 'W', 'CTT' : 'L', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'L', 'CCC' : 'P', 'CAC' : 'H', 'CGC' : 'R', 'CTA' : 'L', 'CCA' : 'P', 'CAA' : 'Q', 'CGA' : 'R', 'CTG' : 'L', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'M', 'ACA' : 'T', 'AAA' : 'K', 'AGA' : 'B', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'R', 'B' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+	start_codons = ['ATT', 'ATC', 'ATA', 'ATG', 'GTG']
 elif codon_code_number == 3: # The Yeast Mitochondrial Code 
 	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TAA', 'TAG'], 'C' : ['TGT', 'TGC'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC'], 'K' : ['AAG', 'AAA'], 'L' : ['TTA', 'TTG'], 'M' : ['ATG', 'ATA'], 'N' : ['AAT', 'AAC'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG'], 'R' : ['CGT', 'CGG', 'AGA', 'AGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG', 'CTT', 'CTC', 'CTA', 'CTG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG', 'TGA', ], 'Y' : ['TAT', 'TAC']}
 	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'B', 'TGA' : 'W', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'B', 'TGG' : 'W', 'CTT' : 'T', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'T', 'CCC' : 'P', 'CAC' : 'H', 'CTA' : 'T', 'CCA' : 'P', 'CAA' : 'Q', 'CTG' : 'T', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'M', 'ACA' : 'T', 'AAA' : 'K', 'AGA' : 'R', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'R', 'GTT' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+	start_codons = ['ATG', 'ATA']
 elif codon_code_number == 4: # The Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code
 	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TAA', 'TAG'], 'C' : ['TGT', 'TGC'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC', 'ATA'], 'K' : ['AAG', 'AAA'], 'L' : ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'M' : ['ATG'], 'N' : ['AAT', 'AAC'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG'], 'R' : ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG', 'TGA'], 'Y' : ['TAT', 'TAC']}
 	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'B', 'TGA' : 'W', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'B', 'TGG' : 'W', 'CTT' : 'L', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'L', 'CCC' : 'P', 'CAC' : 'H', 'CGC' : 'R', 'CTA' : 'L', 'CCA' : 'P', 'CAA' : 'Q', 'CGA' : 'R', 'CTG' : 'L', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'I', 'ACA' : 'T', 'AAA' : 'K', 'AGA' : 'R', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'R', 'GTT' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+	start_codons = ['TTA', 'TTG', 'CTG', 'ATT', 'ATC', 'ATA', 'ATG', 'GTG']
 elif codon_code_number == 5: # The Invertebrate Mitochondrial Code
 	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TAA', 'TAG'], 'C' : ['TGT', 'TGC'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC'], 'K' : ['AAG', 'AAA'], 'L' : ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'M' : ['ATG', 'ATA'], 'N' : ['AAT', 'AAC'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG'], 'R' : ['CGT', 'CGC', 'CGA', 'CGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC', 'AGA', 'AGG'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG', 'TGA'], 'Y' : ['TAT', 'TAC']}
 	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'B', 'TGA' : 'W', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'B', 'TGG' : 'W', 'CTT' : 'L', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'L', 'CCC' : 'P', 'CAC' : 'H', 'CGC' : 'R', 'CTA' : 'L', 'CCA' : 'P', 'CAA' : 'Q', 'CGA' : 'R', 'CTG' : 'L', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'M', 'ACA' : 'T', 'AAA' : 'K', 'AGA' : 'S', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'S', 'GTT' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+	start_codons = ['TTG', 'ATT', 'ATC', 'ATA', 'ATG', 'GTG']
 elif codon_code_number == 6: # The Ciliate, Dasycladacean and Hexamita Nuclear Code 
 	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TGA'], 'C' : ['TGT', 'TGC'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC', 'ATA'], 'K' : ['AAG', 'AAA'], 'L' : ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'M' : ['ATG'], 'N' : ['AAT', 'AAC'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG', 'TAA', 'TAG'], 'R' : ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG'], 'Y' : ['TAT', 'TAC']}
 	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'Q', 'TGA' : 'B', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'Q', 'TGG' : 'W', 'CTT' : 'L', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'L', 'CCC' : 'P', 'CAC' : 'H', 'CGC' : 'R', 'CTA' : 'L', 'CCA' : 'P', 'CAA' : 'Q', 'CGA' : 'R', 'CTG' : 'L', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'I', 'ACA' : 'T', 'AAA' : 'K', 'AGA' : 'R', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'R', 'GTT' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+	start_codons = ['ATG']	
+elif codon_code_number == 9: # The Echinoderm and Flatworm Mitochondrial Code
+	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TAA', 'TAG'], 'C' : ['TGT', 'TGC'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC', 'ATA'], 'K' : ['AAG'], 'L' : ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'M' : ['ATG'], 'N' : ['AAT', 'AAC', 'AAA'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG'], 'R' : ['CGT', 'CGC', 'CGA', 'CGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC', 'AGG', 'AGA'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG', 'TGA'], 'Y' : ['TAT', 'TAC']}
+	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'B', 'TGA' : 'W', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'B', 'TGG' : 'W', 'CTT' : 'L', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'L', 'CCC' : 'P', 'CAC' : 'H', 'CGC' : 'R', 'CTA' : 'L', 'CCA' : 'P', 'CAA' : 'Q', 'CGA' : 'R', 'CTG' : 'L', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'I', 'ACA' : 'T', 'AAA' : 'N', 'AGA' : 'S', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'S', 'GTT' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+	start_codons = ['ATG', 'GTG']
+elif codon_code_number == 10: # The Euplotid Nuclear Code
+	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TAA', 'TAG'], 'C' : ['TGT', 'TGC', 'TGA'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC', 'ATA'], 'K' : ['AAG', 'AAA'], 'L' : ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'M' : ['ATG'], 'N' : ['AAT', 'AAC'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG'], 'R' : ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG'], 'Y' : ['TAT', 'TAC']}
+	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'B', 'TGA' : 'C', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'B', 'TGG' : 'W', 'CTT' : 'L', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'L', 'CCC' : 'P', 'CAC' : 'H', 'CGC' : 'R', 'CTA' : 'L', 'CCA' : 'P', 'CAA' : 'Q', 'CGA' : 'R', 'CTG' : 'L', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'I', 'ACA' : 'T', 'AAA' : 'K', 'AGA' : 'R', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'R', 'GTT' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+	start_codons = ['ATG']
+elif codon_code_number == 11: # The Bacterial, Archaeal and Plant Plastid Code
+	proteins = {'A' : ['GCT', 'GCC', 'GCA', 'GCG'], 'B': ['TAA', 'TGA', 'TAG'], 'C' : ['TGT', 'TGC'], 'D' : [ 'GAT', 'GAC'], 'E' : ['GAA','GAG'], 'F' : ['TTT', 'TTC'], 'G' : ['GGT', 'GGC', 'GGA', 'GGG'], 'H' : ['CAT', 'CAC'], 'I' : ['ATT', 'ATC', 'ATA'], 'K' : ['AAG', 'AAA'], 'L' : ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'M' : ['ATG'], 'N' : ['AAT', 'AAC'], 'P' : ['CCT', 'CCC', 'CCA', 'CCG'], 'Q' : ['CAA', 'CAG'], 'R' : ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'],  'S' : ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'T' : ['ACT', 'ACC', 'ACA', 'ACG'],  'V' : ['GTT', 'GTC', 'GTA', 'GTG'], 'W' : ['TGG'], 'Y' : ['TAT', 'TAC']}
+	codon_trans_standard = {'TTT' : 'F', 'TCT' : 'S', 'TAT' : 'Y', 'TGT' : 'C', 'TTC' : 'F', 'TCC' : 'S', 'TAC' : 'Y', 'TGC' : 'C', 'TTA' : 'L', 'TCA' : 'S', 'TAA' : 'B', 'TGA' : 'B', 'TTG' : 'L', 'TCG' : 'S', 'TAG' : 'B', 'TGG' : 'W', 'CTT' : 'L', 'CCT' : 'P', 'CAT' : 'H', 'CGT' : 'R', 'CTC' : 'L', 'CCC' : 'P', 'CAC' : 'H', 'CGC' : 'R', 'CTA' : 'L', 'CCA' : 'P', 'CAA' : 'Q', 'CGA' : 'R', 'CTG' : 'L', 'CCG' : 'P', 'CAG' : 'Q', 'CGG' : 'R', 'ATT' : 'I', 'ACT' : 'T', 'AAT' : 'N', 'AGT' : 'S', 'ATC' : 'I', 'ACC' : 'T', 'AAC' : 'N', 'AGC' : 'S', 'ATA' : 'I', 'ACA' : 'T', 'AAA' : 'K', 'AGA' : 'R', 'ATG' : 'M', 'ACG' : 'T', 'AAG' : 'K', 'AGG' : 'R', 'GTT' : 'V', 'GCT' : 'A', 'GAT' : 'D', 'GGT' : 'G', 'GTC' : 'V', 'GCC' : 'A', 'GAC' : 'D', 'GGC' : 'G', 'GTA' : 'V', 'GCA' : 'A', 'GAA' : 'E', 'GGA' : 'G', 'GTG' : 'V', 'GCG' : 'A', 'GAG' : 'E', 'GGG' : 'G'}
+	start_codons = ['TTG', 'CTG', 'ATT', 'ATC', 'ATA', 'ATG', 'GTG']
 alphabetic_codons = ['AAA', 'AAC', 'AAG', 'AAT', 'ACA', 'ACC', 'ACG', 'ACT', 'AGA', 'AGC', 'AGG', 'AGT', 'ATA', 'ATC', 'ATG', 'ATT', 'CAA', 'CAC', 'CAG', 'CAT', 'CCA', 'CCC', 'CCG', 'CCT', 'CGA', 'CGC', 'CGG', 'CGT', 'CTA', 'CTC', 'CTG', 'CTT', 'GAA', 'GAC', 'GAG', 'GAT', 'GCA', 'GCC', 'GCG', 'GCT', 'GGA', 'GGC', 'GGG', 'GGT', 'GTA', 'GTC', 'GTG', 'GTT', 'TAA', 'TAC', 'TAG', 'TAT', 'TCA', 'TCC', 'TCG', 'TCT', 'TGA', 'TGC', 'TGG', 'TGT', 'TTA', 'TTC', 'TTG', 'TTT']
 symbols = {'Ala': 'A', 'Cys' : 'C', 'Asp' : 'D', 'Glu':'E', 'Phe':'F', 'Gly':'G', 'His': 'H', 'Ile': 'I', 'Lys':'K' , 'Leu': 'L', 'Met': 'M', 'Asn':'N', 'Pro':'P', 'Gln':'Q', 'Arg': 'R', 'Ser':'S' , 'Thr':'T',  'Val':'V', 'Trp':'W', 'Tyr':'Y'}
 sij_values = {'AT' : 0, 'CG' : 0, 'GC' : 0, 'TA' : 0, 'TG' : 0.698, 'GT' : 0.6294, 'AG' : 1, 'CC' : 1, 'CT' : 1, 'GG' : 1, 'GA' : 1, 'TT' : 0.7, 'TC' : 0.95} #('AA' : 0.8773, 'CA' : 0.7309, 'AC' : 0.4211,)addressed in get_tAI  2014 Tuller et. al.#anticodon #codon
@@ -108,7 +137,7 @@ def Genome_wide_analysis(CDS_file):
 				if len(temp) > 0:
 					f2.write(acc+" contains "+temp+" ie. letters that aren't ATCG\n")
 					bad_sequence_count = bad_sequence_count + 1
-				elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
+				elif line[0:3] in start_codons and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
 					sequence_count = sequence_count + 1
 					p = 1
 					for letter in line:
@@ -128,8 +157,8 @@ def Genome_wide_analysis(CDS_file):
 						f2.write(acc+" is not divisible by 3 (possible frame shift error)\n")
 					elif codon_trans_standard[line[len(line) - 3:]] != "B":
 						f2.write(acc+" has no stop codon\n")
-					elif codon_trans_standard[line[0:3]] != "M":
-						f2.write(acc+" has no start codon\n")
+					elif line[0:3] not in start_codons:
+						f2.write(acc+"\t"+str(codon_trans_standard[line[0:3]])+" is not a start codon\n")
 					else:
 						f2.write(acc+" has been excluded for mysterious reasons. Check why manually.\n")
 					bad_sequence_count = bad_sequence_count + 1
@@ -158,40 +187,63 @@ def Genome_wide_analysis(CDS_file):
 	except NameError:
 		Options = ['Mb', 'Sc']
 	print "Analysing whole genome sequence data (<1 min)"
-	#AIC = 2k - 2ln(L) # minimum AIC is best
-	best_log_likelihood = 10000000000000000000
-	AIC = 10000000000000000000
-	best = ''
-	i = 0
-	while i < len(Options):
-		opt = Options[i]
-		model = opt
-		number_para = 1
-		res_model, log_likelihood_model, r2_model = get_math_function(model, 0, 0, 0, 0)
-		AIC_model = (2*number_para)-(2*(log_likelihood_model))
-		if AIC_model < AIC:
-			best_res, best_log_likelihood, best_r2, best, AIC = res_model, log_likelihood_model, r2_model, model, AIC_model
-		j = i + 1
-		while j < len(Options):
-			opt_2 = Options[j]
-			model = opt+"_"+opt_2
-			number_para = 2
+	if model_fix == "find":
+		print "Finding best model to use for this data set\n"
+		#AIC = 2k - 2ln(L) # minimum AIC is best
+		best_log_likelihood = 10000000000000000000
+		AIC = 10000000000000000000
+		best = ''
+		i = 0
+		while i < len(Options):
+			opt = Options[i]
+			model = opt
+			number_para = 1
 			res_model, log_likelihood_model, r2_model = get_math_function(model, 0, 0, 0, 0)
 			AIC_model = (2*number_para)-(2*(log_likelihood_model))
 			if AIC_model < AIC:
 				best_res, best_log_likelihood, best_r2, best, AIC = res_model, log_likelihood_model, r2_model, model, AIC_model
-			k = j + 1
-			while k < len(Options):
-				opt_3 = Options[k]
-				model = opt+"_"+opt_2+"_"+opt_3
-				number_para = 3
+			j = i + 1
+			while j < len(Options):
+				opt_2 = Options[j]
+				model = opt+"_"+opt_2
+				number_para = 2
 				res_model, log_likelihood_model, r2_model = get_math_function(model, 0, 0, 0, 0)
 				AIC_model = (2*number_para)-(2*(log_likelihood_model))
 				if AIC_model < AIC:
 					best_res, best_log_likelihood, best_r2, best, AIC = res_model, log_likelihood_model, r2_model, model, AIC_model
-				k = k + 1
-			j = j + 1
-		i = i + 1
+				k = j + 1
+				while k < len(Options):
+					opt_3 = Options[k]
+					model = opt+"_"+opt_2+"_"+opt_3
+					number_para = 3
+					res_model, log_likelihood_model, r2_model = get_math_function(model, 0, 0, 0, 0)
+					AIC_model = (2*number_para)-(2*(log_likelihood_model))
+					if AIC_model < AIC:
+						best_res, best_log_likelihood, best_r2, best, AIC = res_model, log_likelihood_model, r2_model, model, AIC_model
+					k = k + 1
+				j = j + 1
+			i = i + 1
+	else:
+		if 'Mb' in model_fix and 'Sc' in model_fix and 'St' in model_fix:
+			number_para = 3
+			best = 'Mb_Sc_St'
+		elif 'Mb' in model_fix and 'Sc' in model_fix:
+			number_para = 2
+			best = 'Mb_Sc'
+		elif 'Mb' in model_fix and 'St' in model_fix:
+			number_para = 2
+			best = 'Mb_St'
+		elif 'St' in model_fix and 'Sc' in model_fix:
+			number_para = 2
+			best = 'Sc_St'
+		elif 'Mb' in model_fix or 'Sc' in model_fix or 'St' in model_fix:
+			number_para = 1
+			best = model_fix.replace("_", "")
+		else:
+			print "Please input the specified model using the options Mb Sc St separated by _ eg. Mb_Sc_St or Mb_St or Mb etc."
+		print "\nYou have specified model %s which has %d input(s).\n" %(best, number_para)
+		best_res, best_log_likelihood, best_r2 = get_math_function(best, 0, 0, 0, 0)
+		AIC = (2*number_para)-(2*(best_log_likelihood))
 	best_r2 = round(best_r2, 4)
 	AIC = round(AIC, 1)
 	best_log_likelihood = round(best_log_likelihood, 1)
@@ -208,20 +260,21 @@ def Genome_wide_analysis(CDS_file):
 	else:
 		best_res[2] = 0
 	model_used = best.replace("_", "+")
-	f1.write("Genome-wide Results Summary:\nLn_L = "+str(best_log_likelihood)+"\nAIC = "+str(AIC)+"\nR2 = "+str(best_r2)+"\nMutation bias (Mb) = "+str(best_res[0])+"\nSelection on cost (Sc) = "+str(best_res[1])+"\nSelection on translational efficiency (St) = "+str(best_res[2])+"\nBest fitting model = "+model_used+"\n\n")
+	f1.write("Genome-wide Results Summary:\nLn_L = "+str(best_log_likelihood)+"\nAIC = "+str(AIC)+"\nR2 = "+str(best_r2)+"\nMutation bias (Mb) = "+str(best_res[0])+"\nSelection on cost (Sc) = "+str(best_res[1])+"\nSelection on translational efficiency (St) = "+str(best_res[2])+"\nModel used = "+model_used+"\n\n")
 	f1.write("Amino acid\tCodon\tObserved frequency\tFitted frequency\n")
 	for aa in proteins:
-		for codon in proteins[aa]:
-			fitted = get_probability_codon(codon, best, best_res[0], best_res[1], best_res[2], 0)
-			fitted = round(fitted, 2)
-			relative = float(relative_codon_use[codon])
-			relative = round(relative, 2)
-			f1.write(aa+"\t"+codon+"\t"+str(relative)+"\t"+str(fitted)+"\n")
+		if aa != 'B':
+			for codon in proteins[aa]:
+				fitted = get_probability_codon(codon, best, best_res[0], best_res[1], best_res[2], 0)
+				fitted = round(fitted, 2)
+				relative = float(relative_codon_use[codon])
+				relative = round(relative, 2)
+				f1.write(aa+"\t"+codon+"\t"+str(relative)+"\t"+str(fitted)+"\n")
 	f1.close()
 	f2.close()
 	print "\n%d Sequences containing %d codons were analysed\n%d Sequences excluded (details in *_excluded_sequences.txt)" %(sequence_count, total_codons, bad_sequence_count)
 	print "\n%d tRNAs were used\n%d tRNAs excluded (details in *_tRNAscan_errors.txt)\n" %(tRNA_count, bad_tRNAs)
-	print "Results Summary:\nLn_L = %d\nAIC =\t%d\nR2 =\t%s\nMb =\t%s\nSc =\t%s\nSt =\t%s\nBest fitting model =%s\n" %(best_log_likelihood, AIC, str(best_r2), str(best_res[0]), str(best_res[1]), str(best_res[2]), model_used)
+	print "Results Summary:\nLn_L = %d\nAIC =\t%d\nR2 =\t%s (excluding amino acids with only one codon)\nMb =\t%s\nSc =\t%s\nSt =\t%s\nModel = %s\n" %(best_log_likelihood, AIC, str(best_r2), str(best_res[0]), str(best_res[1]), str(best_res[2]), model_used)
 	return best, best_res[0]
 	
 def per_gene_analysis(CDS_file, best_model):
@@ -253,7 +306,7 @@ def per_gene_analysis(CDS_file, best_model):
 				temp = temp.replace("T", "")
 				temp = temp.replace("C", "")
 				temp = temp.replace("G", "")
-				if len(temp) == 0 and codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
+				if len(temp) == 0 and line[0:3] in start_codons and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
 					p = 1
 					for letter in line:
 						if p % 3 == 0:
@@ -414,7 +467,7 @@ def get_upper_equation(codon, parameter, Mb, Sc, St, Es, equation_type, fixed_Mb
 			Energy = '%.4f'%(Energy_shuffled[codon])
 		return "(math.exp("+Es+"*"+Energy+"))*"
 	else:
-		print "What has gone wrong here? Not a recognised parameter %s\n" %parameter
+		print "%s is not a recognised parameter\nOnly Mb, Sc and St are recognised parameters\n\n" %parameter
 
 def get_p_value(shuffle_type, real_likelihood, accuracy, Mb_in, Ns_in, Te_in): #
 	counter = 1
@@ -670,7 +723,7 @@ def run_pareto_optimisation():
 				temp = temp.replace("T", "")
 				temp = temp.replace("C", "")
 				temp = temp.replace("G", "")
-				if len(temp) == 0 and codon_trans_standard[sequence[0:3]] == "M" and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
+				if len(temp) == 0 and sequence[0:3] in start_codons and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
 					codon = ""
 					amino_seq = []
 					cost = 0
