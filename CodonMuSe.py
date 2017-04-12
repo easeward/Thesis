@@ -3,7 +3,7 @@
 """
 Input files must be fastas and in the format genus_species_formatted_CDS.fasta eg. Arabidopsis_thaliana_formatted_CDS.fasta
 How to input a command:
-python CodonMuSel.py -f Genus_species.fasta -tscan Genus_species_tRNAscan.txt -tc 1 -ind -fix_mb -par
+python CodonMuSe.py -f Genus_species.fasta -tscan Genus_species_tRNAscan.txt -tc 1 -ind -fix_mb -par
 If you have a tRNAscan you can include it as the second input of the command (as above). With or without the tRNAscan file you can also run
 the script on individual genes (include the command -ind) with or without fixing the mutation_bias of each gene to the global mutation bias (from the formatted_CDS file) by adding -fix_mb.
 """
@@ -28,7 +28,7 @@ if "-f" in sys.argv:
 else:
 	print "\n\t\tCodonMusel version 0.1.0\n"
 	print "This software is distributed under the Univeristy of Oxford Academic Use\nLicence. For details please see the License.md that came with this software.\n"
-	print "Usage:\npython CodonMuSel.py [options] -f <sequence file> -tscan <tRNAscan file>\n"	
+	print "Usage:\npython CodonMuSe.py [options] -f <sequence file> -tscan <tRNAscan file>\n"	
 	print "Options:"
 	print "  -f <FILE>     A FASTA file of protein coding nucleotide seqeunces"
 	print "  -tscan <FILE> A tRNA copy number file produced by tRNAscan"
@@ -37,7 +37,7 @@ else:
 	print "  -fix_mb       Fix mutation bias to genome-wide value for individual genes"
 	print "  -par          Determine cost and efficiency optimality of individual genes\n"
 	print "Citation:";
-	print "When publishing work that uses CodonMuSel please cite:";
+	print "When publishing work that uses CodonMuSe please cite:";
 	print "Seward EA and Kelly S (2016) Genome Biology 17(1):226\n";
 	exit()
 if "-tscan" in sys.argv:
@@ -80,7 +80,6 @@ bases = ['A', 'T', 'C', 'G']
 
 def Genome_wide_analysis(CDS_file):
 	f1=open(species+"_GenomeWideResults.txt", "w")
-	f1.write("Log_likelihood\tAIC\tR2\tMutation_bias_Mb\tSelection_on_cost_Sc\tSelection_on_translational_efficiency_St\n")
 	f2=open(species+"_problems_GenomeWideResults.txt", "w")				
 	global codon_count
 	codon_count = {}
@@ -149,7 +148,7 @@ def Genome_wide_analysis(CDS_file):
 		Options = ['Mb', 'Sc', 'St']
 	except NameError:
 		Options = ['Mb', 'Sc']
-	print "Analysing whole genome sequence data. Should be <1 min unless file is very large."
+	print "Analysing whole genome sequence data (<1 min)"
 	#AIC = 2k - 2ln(L) # minimum AIC is best
 	best_log_likelihood = 10000000000000000000
 	AIC = 10000000000000000000
@@ -199,12 +198,20 @@ def Genome_wide_analysis(CDS_file):
 		best_res[2] = round(best_res[2], 4)
 	else:
 		best_res[2] = 0
-	f1.write(str(best_log_likelihood)+"\t"+str(AIC)+"\t"+str(best_r2)+"\t"+str(best_res[0])+"\t"+str(best_res[1])+"\t"+str(best_res[2])+"\n")
+	model_used = best.replace("_", "+")
+	f1.write("Genome-wide Results Summary:\nLn_L = "+str(best_log_likelihood)+"\nAIC = "+str(AIC)+"\nR2 = "+str(best_r2)+"\nMutation bias (Mb) = "+str(best_res[0])+"\nSelection on cost (Sc) = "+str(best_res[1])+"\nSelection on translational efficiency (St) = "+str(best_res[2])+"\nBest fitting model = "+model_used+"\n\n")
+	f1.write("Amino acid\tCodon\tObserved frequency\tFitted frequency\n")
+	for aa in proteins:
+		for codon in proteins[aa]:
+			fitted = get_probability_codon(codon, best, best_res[0], best_res[1], best_res[2], 0)
+			fitted = round(fitted, 2)
+			relative = float(relative_codon_use[codon])
+			relative = round(relative, 2)
+			f1.write(aa+"\t"+codon+"\t"+str(relative)+"\t"+str(fitted)+"\n")
 	f1.close()
 	f2.close()
-	print "\n%d Sequences containing %d codons were analysed\n%d Sequences were excluded from the analysis (details in species_problems_GenomeWideResults.txt)" %(sequence_count, total_codons, bad_sequence_count)
-	print "Results Summary:\nLog_likelihood = %d\nAIC =\t%d\nR2 =\t%s\nMb =\t%s\nSc =\t%s\nSt =\t%s\nModel used =%s\n" %(best_log_likelihood, AIC, str(best_r2), str(best_res[0]), str(best_res[1]), str(best_res[2]), best)
-	print "When using this software please cite:\nSeward EA, Kelly S (2016) Dietary nitrogen alters codon bias and genome composition in parasitic microorganisms. Genome Biology 17(1):226\n"
+	print "\n%d Sequences containing %d codons were analysed\n%d Sequences excluded (details in *_problems_GenomeWideResults.txt)" %(sequence_count, total_codons, bad_sequence_count)
+	print "Results Summary:\nLn_L = %d\nAIC =\t%d\nR2 =\t%s\nMb =\t%s\nSc =\t%s\nSt =\t%s\nBest fitting model =%s\n" %(best_log_likelihood, AIC, str(best_r2), str(best_res[0]), str(best_res[1]), str(best_res[2]), model_used)
 	return best, best_res[0]
 	
 def per_gene_analysis(CDS_file, best_model):
@@ -782,3 +789,5 @@ if "-ind" in sys.argv:
 	per_gene_analysis(CDS_file, model_to_use)
 if "-par" in sys.argv:
 	run_pareto_optimisation()
+	
+print "CodonMuSe (1) implements the SK model (2).\nWhen publishing work that uses CodonMuSe please cite both:\n(1) Seward EA and Kelly S (2017) bioRxiv doi.org/XX.XXXX/XXXXXX\n(2) Seward EA and Kelly S (2016) Genome Biology 17(1):226\n"
