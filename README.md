@@ -34,7 +34,7 @@ The **_CodonMuSe_** implementation of the SK model was first published in:
 	-ind		Analyse individual genes in adition to a genomewide analysis
 	-fix_mb		Fix mutation bias to genome-wide value for individual genes
 	-par 		Determine the cost and efficiency optimality of individual genes
-	-m <TXT>	Specify model parameters to optimise. Valid options Mb, Sc, St 
+	-m <TXT>	Specify model parameters (Mb, Sc, St) eg. Mb_Sc_St or Mb_Sc 
 	                (Default = determine best parameter combination automatically)
 
 ## Input Files
@@ -78,4 +78,4 @@ This file contains information about any sequences that were not used in the **_
 
 An example dataset is provided. To run CodonMuSe on this dataset execute the following command
 
-`python CodonMuSe.py -f M_pneumoniae_CDS.fasta -tscan M_pneumoniae_tRNAscan.txt -tc 4 -ind -fix_mb -par`
+`python CodonMuSe.py -f M_pneumoniae_CDS.fasta -tscan M_pneumoniae_tRNAscan.txt -tc 4 -ind -fix_mb -par -m Mb_Sc_St'
