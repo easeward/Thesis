@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+# -*- coding: utf-8 -*- !/usr/bin/env python
 """
 Input files must be fastas and in the format genus_species_formatted_CDS.fasta eg. Arabidopsis_thaliana_formatted_CDS.fasta
 How to input a command:
@@ -80,7 +79,7 @@ bases = ['A', 'T', 'C', 'G']
 
 def Genome_wide_analysis(CDS_file):
 	f1=open(species+"_GenomeWideResults.txt", "w")
-	f2=open(species+"_problems_GenomeWideResults.txt", "w")				
+	f2=open(species+"_excluded_sequences.txt", "w")				
 	global codon_count
 	codon_count = {}
 	protein_count = {}
@@ -106,7 +105,7 @@ def Genome_wide_analysis(CDS_file):
 				temp = temp.replace("C", "")
 				temp = temp.replace("G", "")
 				if len(temp) > 0:
-					f2.write(acc+" contains letters that aren't ATCG so is being excluded from the analysis\n")
+					f2.write(acc+" contains "+temp+" ie. letters that aren't ATCG\n")
 					bad_sequence_count = bad_sequence_count + 1
 				elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
 					sequence_count = sequence_count + 1
@@ -122,7 +121,16 @@ def Genome_wide_analysis(CDS_file):
 							p += 1
 							codon = codon + letter
 				else:
-					f2.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
+					if len(line)<=30:
+						f2.write(acc+" is "+len(line)+"bp long ie.< 30bp\n")
+					elif len(line)%3 != 0:
+						f2.write(acc+" is not divisible by 3 (possible frame shift error)\n")
+					elif codon_trans_standard[line[len(line) - 3:]] != "B":
+						f2.write(acc+" has no stop codon\n")
+					elif codon_trans_standard[line[0:3]] != "M":
+						f2.write(acc+" has no start codon\n")
+					else:
+						f2.write(acc+" has been excluded for mysterious reasons. Check why manually.\n")
 					bad_sequence_count = bad_sequence_count + 1
 	global relative_codon_use
 	relative_codon_use = {}
@@ -144,7 +152,7 @@ def Genome_wide_analysis(CDS_file):
 	final_log_likelihood = "%.2f" %(log_likelihood)
 	#Mutation_bias = Mb	Nitrogen Selection = Sc		Translational Efficiency = St		Energy selection = Es
 	try:
-		get_tAI_values(tSCAN_file)
+		tRNA_count, bad_tRNAs = get_tAI_values(tSCAN_file)
 		Options = ['Mb', 'Sc', 'St']
 	except NameError:
 		Options = ['Mb', 'Sc']
@@ -210,7 +218,8 @@ def Genome_wide_analysis(CDS_file):
 			f1.write(aa+"\t"+codon+"\t"+str(relative)+"\t"+str(fitted)+"\n")
 	f1.close()
 	f2.close()
-	print "\n%d Sequences containing %d codons were analysed\n%d Sequences excluded (details in *_problems_GenomeWideResults.txt)" %(sequence_count, total_codons, bad_sequence_count)
+	print "\n%d Sequences containing %d codons were analysed\n%d Sequences excluded (details in *_excluded_sequences.txt)" %(sequence_count, total_codons, bad_sequence_count)
+	print "\n%d tRNAs were used\n%d tRNAs excluded (details in *_tRNAscan_errors.txt)" %(tRNA_count, bad_tRNAs)
 	print "Results Summary:\nLn_L = %d\nAIC =\t%d\nR2 =\t%s\nMb =\t%s\nSc =\t%s\nSt =\t%s\nBest fitting model =%s\n" %(best_log_likelihood, AIC, str(best_r2), str(best_res[0]), str(best_res[1]), str(best_res[2]), model_used)
 	return best, best_res[0]
 	
@@ -218,7 +227,6 @@ def per_gene_analysis(CDS_file, best_model):
 	print "Analysing individual genes. This takes ~ 1 second per gene.\n"
 	f1=open(species+"_IndividualGenesResults.txt", "w")
 	f1.write("Accession\tLog_likelihood\tMb\tSc\tSt")
-	f2=open(species+"_problems_IndividualGenesResults.txt", "w")				
 	with open(CDS_file) as CDSfile:
 		try:
 			get_tAI_values(tSCAN_file)
@@ -244,9 +252,7 @@ def per_gene_analysis(CDS_file, best_model):
 				temp = temp.replace("T", "")
 				temp = temp.replace("C", "")
 				temp = temp.replace("G", "")
-				if len(temp) > 0:
-					f2.write(acc+" contains letters that aren't ATCG so is being excluded from the analysis\n")
-				elif codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
+				if len(temp) == 0 and codon_trans_standard[line[0:3]] == "M" and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
 					p = 1
 					for letter in line:
 						if p % 3 == 0:
@@ -291,9 +297,6 @@ def per_gene_analysis(CDS_file, best_model):
 					else:
 						res_model[2] = 0
 					f1.write("\n"+acc+"\t"+str(likelihood_model)+"\t"+str(res_model[0])+"\t"+str(res_model[1])+"\t"+str(res_model[2]))
-				else:
-					f2.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
-	f2.close()
 	f1.close()
 
 def get_math_function(model_type, start_Mb, start_Ns, start_Te, start_Es):
@@ -521,12 +524,14 @@ def write_equation(model_type):
 	return str
 	
 def get_tAI_values(input):
-	f3=open("Problems_"+input, "w")		
+	f3=open(species+"_tRNAscan_errors.txt", "w")
 	anticodons = {}
 	perfect_match = {}
 	count = 0
 	protein_index = {}
 	anti_codon_index = {}
+	tRNA_count = 0
+	bad_tRNAs = 0
 	for prot in proteins:
 		protein_index[prot] = count
 		anticodons[prot] = []
@@ -551,8 +556,23 @@ def get_tAI_values(input):
 			if "tRNA" in line or "---" in line:
 				line = line
 			elif "SeC" in line or "Undet" in line or an == '???' or "Pseudo" in line or bits[4] == 'Sup' or 'fMet' in line:
-				f3.write(line+" includes SeC or Sup or pseudo or fMet and is not used in this analysis.\n")
+				bad_tRNAs = bad_tRNAs + 1
+				if "SeC" in line:
+					f3.write(line+" includes SeC so is excluded from the analysis.\n")
+				elif "Undet" in line:
+					f3.write(line+" includes Undet so is excluded from the analysis\n")
+				elif an == '???':
+					f3.write(line+" includes ??? so is excluded from the analysis.\n")
+				elif "Pseudo" in line:
+					f3.write(line+" includes Pseudo so is excluded from the analysis\n")
+				elif bits[4] == 'Sup':
+					f3.write(line+" includes Sup so is excluded from the analysis\n")
+				elif 'fMet' in line:
+					f3.write(line+" includes fMet so is excluded from the analysis\n")
+				else:
+					f3.write(line+" excluded for unknown reason\n")
 			else:
+				tRNA_count = tRNA_count + 1
 				amino_a = symbols[bits[4]]
 				p_index = protein_index[amino_a]
 				ac_index = anti_codon_index[an]
@@ -600,9 +620,9 @@ def get_tAI_values(input):
 				else:
 					sij_value = 1
 			tai = tai + (1- sij_value)*anticodon_count[p_index][ac_index]
-		#	print tai, codon, anticodon, translated, anticodon_count[p_index][ac_index], sij_value
 		tAI_value[codon] = tai
 	f3.close()
+	return tRNA_count, bad_tRNAs
 
 def using_shuffle(x):
 	keys = x.keys()
@@ -636,7 +656,6 @@ def run_pareto_optimisation():
 	get_tAI_values(tSCAN_file)
 	f1=open(species+"_OptimisationResults.txt", "w")
 	f1.write("Accession\t%Both_optimised\t%Cost_optimised\t%tAI_optimised\n")
-	f2=open(species+"_problems_OptimisationResults.txt", "w")
 	with open(CDS_file) as CDSfile:
 		for sequence in CDSfile:
 			sequence = str(sequence.rstrip().strip())
@@ -650,9 +669,7 @@ def run_pareto_optimisation():
 				temp = temp.replace("T", "")
 				temp = temp.replace("C", "")
 				temp = temp.replace("G", "")
-				if len(temp) > 0:
-					f2.write(acc+" contains letters that aren't ATCG so is being excluded from the analysis\n")
-				elif codon_trans_standard[sequence[0:3]] == "M" and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
+				if len(temp) == 0 and codon_trans_standard[sequence[0:3]] == "M" and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
 					codon = ""
 					amino_seq = []
 					cost = 0
@@ -772,10 +789,7 @@ def run_pareto_optimisation():
 					Cost_optimised = round(Cost_optimised, 2)
 					tAI_optimised = round(tAI_optimised, 2)
 					f1.write(acc+"\t"+str(Both_optimised)+"\t"+str(Cost_optimised)+"\t"+str(tAI_optimised)+"\n")
-				else:
-					f2.write(acc+" is either < 30bp, doesn't start with start codon, doesn't stop with a stop codon or is not divisible by 3 so is being excluded from the analysis\n")
 	f1.close()
-	f2.close()
 
 global fixed_Mb
 fixed_Mb = "moveable"
