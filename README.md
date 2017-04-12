@@ -34,7 +34,8 @@ The **_CodonMuSe_** implementation of the SK model was first published in:
 	-ind		Analyse individual genes in adition to a genomewide analysis
 	-fix_mb		Fix mutation bias to genome-wide value for individual genes
 	-par 		Determine the cost and efficiency optimality of individual genes
-	-m <TXT>	Specify model constraints valid options Mb, Sc, St (Default determine best automatically)
+	-m <TXT>	Specify model parameters to optimise valid options Mb, Sc, St 
+	                (Default = determine best parameter combination automatically)
 
 ## Input Files
 
