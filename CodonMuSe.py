@@ -38,7 +38,8 @@ else:
 	print "  -ind          Analysed individual genes in adition to a genomewide analysis"
 	print "  -fix_mb       Fix mutation bias to genome-wide value for individual genes"
 	print "  -par          Determine cost and efficiency optimality of individual genes"
-	print "  -m <MODEL>    Fix model parameters (Default = find best model using AIC)\n"
+	print "  -m <TXT>      Specify model parameters (Mb, Sc, St) eg. Mb_Sc_St or Mb_Sc"
+	print "                (Default = determine best parameter combination automatically)\n"
 	print "Citation:";
 	print "CodonMuSe (1) implements the SK model (2)."
 	print "When publishing work that uses CodonMuSe please cite both:"
@@ -50,12 +51,12 @@ if "-tscan" in sys.argv:
 	tscan_index = command_line.index("-tscan") + 1
 	tSCAN_file = sys.argv[tscan_index]
 else:
-	print "You have not specified the tRNAscan file using the format -tscan Genus_species_tRNAscan.txt therefore this analysis will be run without selection acting on translational effiency as an option\n"
+	print "You have not specified the tRNAscan file using the format -tscan Genus_species_tRNAscan.txt\nTherefore this analysis will run without using St (selection acting on translational effiency)\n"
 if "-tc" in sys.argv:
 	codon_code_number_index = command_line.index("-tc") + 1
 	codon_code_number = int(sys.argv[codon_code_number_index])
 else:
-	print "\nYou haven't specified a translation table from 1-6 so the standard code (1) will be used\n";
+	print "\nNo translation table specified (1-11) so the standard code (1) will be used\n";
 	codon_code_number = 1
 if "-m" in sys.argv:
 	model_index = command_line.index("-m") + 1
@@ -145,7 +146,7 @@ def Genome_wide_analysis(CDS_file):
 							p += 1
 							codon = codon + letter
 							codon_count[codon] = codon_count[codon] + 1
-							protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1 #print "%d %s %d %s" %(codon_count[codon], codon, protein_count[codon_trans_standard[codon]], codon_trans_standard[codon])
+							protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1
 							codon = ""
 						else:
 							p += 1
@@ -158,7 +159,7 @@ def Genome_wide_analysis(CDS_file):
 					elif codon_trans_standard[line[len(line) - 3:]] != "B":
 						f2.write(acc+" has no stop codon\n")
 					elif line[0:3] not in start_codons:
-						f2.write(acc+"\t"+str(codon_trans_standard[line[0:3]])+" is not a start codon\n")
+						f2.write(acc+"\t"+str(line[0:3])+" is not a start codon\n")
 					else:
 						f2.write(acc+" has been excluded for mysterious reasons. Check why manually.\n")
 					bad_sequence_count = bad_sequence_count + 1
@@ -240,7 +241,7 @@ def Genome_wide_analysis(CDS_file):
 			number_para = 1
 			best = model_fix.replace("_", "")
 		else:
-			print "Please input the specified model using the options Mb Sc St separated by _ eg. Mb_Sc_St or Mb_St or Mb etc."
+			print "Please input the specified model using the options Mb Sc St separated by _\neg. Mb_Sc_St or Mb_St or Mb etc."
 		print "\nYou have specified model %s which has %d input(s).\n" %(best, number_para)
 		best_res, best_log_likelihood, best_r2 = get_math_function(best, 0, 0, 0, 0)
 		AIC = (2*number_para)-(2*(best_log_likelihood))
@@ -705,7 +706,7 @@ def pareto_frontier(Xs, Ys, maxX, maxY):
 	return p_frontX, p_frontY
 
 def run_pareto_optimisation():
-	print "Determining the optimality of gene sequences. This takes ~5 seconds per gene but varies with length.\n"
+	print "Determining sequence optimality (~5 seconds per gene but varies with length).\n"
 	get_tAI_values(tSCAN_file)
 	f1=open(species+"_OptimisationResults.txt", "w")
 	f1.write("Accession\t%Both_optimised\t%Cost_optimised\t%tAI_optimised\n")
@@ -849,10 +850,10 @@ fixed_Mb = "moveable"
 model_to_use, fixed_Mb = Genome_wide_analysis(CDS_file)
 if "-ind" in sys.argv:
 	if "-fix_mb" in sys.argv:
-		print "\nMutaiton bias is will be fixed to the genome-wide Mb value for individual gene analysis.\n"
+		print "\nMutaiton bias fixed to the genome-wide Mb for individual gene analysis.\n"
 	else:
 		fixed_Mb = "moveable"
-		print "\nMutaiton bias is not fixed for individual genes. I would not recommend this. add -fix_mb to end of command line to run with Mb values fixed to genome-wide Mb values\n"
+		print "\nMutaiton bias not fixed for individual genes.\nI would not recommend this.\nadd -fix_mb to command line to run with genome-wide Mb values\n"
 	per_gene_analysis(CDS_file, model_to_use)
 if "-par" in sys.argv:
 	run_pareto_optimisation()
