@@ -706,7 +706,6 @@ def pareto_frontier(Xs, Ys, maxX, maxY):
 
 def run_pareto_optimisation():
 	print "Determining the optimality of gene sequences. This takes ~5 seconds per gene but varies with length.\n"
-	print "When using this part of the software please also cite:\nSeward EA, Kelly S (DATE), Title, Journal\n"
 	get_tAI_values(tSCAN_file)
 	f1=open(species+"_OptimisationResults.txt", "w")
 	f1.write("Accession\t%Both_optimised\t%Cost_optimised\t%tAI_optimised\n")
