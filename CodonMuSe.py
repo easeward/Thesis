@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*- !/usr/bin/env python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- 
 """
 Input files must be fastas and in the format genus_species_formatted_CDS.fasta eg. Arabidopsis_thaliana_formatted_CDS.fasta
 How to input a command:
