@@ -78,5 +78,5 @@ This file contains information about any sequences that were not used in the **_
 
 An example dataset is provided. To run CodonMuSe on this dataset execute the following command
 
-`python CodonMuSe.py -f M_pneumoniae_CDS.fasta -tscan M_pneumoniae_tRNAscan.txt -tc 4 -ind -fix_mb -par -m Mb_Sc_St'
+`python CodonMuSe.py -f M_pneumoniae_CDS.fasta -tscan M_pneumoniae_tRNAscan.txt -tc 4 -ind -fix_mb -par -m Mb_Sc_St`
 
