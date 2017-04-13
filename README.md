@@ -60,11 +60,11 @@ This file contains the results of analysing the genome-wide codon bias patterns.
 
 **\<SEQUENCE FILE\>\_IndividualGenesResults.txt**
 
-This file contains the results of analysing the each individual gene's codon bias patterns. The file contains a tab separated table which records the gene accession, model log likelihood value and fitted gene-specific values for each parameter (Mutation bias [Mb], Selection acting on nucleotide cost [Sc] and Selection acting on translational efficiency [St]). Omitted parameters are given a value of zero.
+This file contains the results of analysing each individual gene's codon bias patterns. The file contains a tab separated table which records the gene accession, model log likelihood value and fitted gene-specific values for each parameter (Mutation bias [Mb], Selection acting on nucleotide cost [Sc] and Selection acting on translational efficiency [St]). Omitted parameters are given a value of zero.
 
 **\<SEQUENCE FILE\>__OptimisationResults.txt**
 
-This file contains the results of analysing the each individual gene's percentage optimisation. The file contains a tab separated table which records the gene accession, percentage optimisation for both transcript cost and transcript translational efficiency, percentage optimisation for transcript cost (individually) and percentage optimisation for translational efficiency (individually). 
+This file contains the results of analysing each individual gene's percentage optimisation. The file contains a tab separated table which records the gene accession, percentage optimisation for both transcript cost and transcript translational efficiency, percentage optimisation for transcript cost (individually) and percentage optimisation for translational efficiency (individually). 
 
 **\<SEQUENCE FILE\>__tRNAscan_errors.txt**
 
