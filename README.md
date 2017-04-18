@@ -12,7 +12,7 @@
 3) Jointly optimised for both cost and translational efficiency.
 
 ## How _CodonMuSe_ works
-**_CodonMuSe_** implements the SK model for inferring the impact on **Codon** bias of **Mu**tation and **Se**lection acting on nucleotide cost and translational efficiency. The SK model was first described in:
+CodonMuSe implements the SK model for inferring the impact on **Codon** bias of **Mu**tation and **Se**lection acting on nucleotide cost and translational efficiency. The SK model was first described in:
 
 **Seward EA, Kelly S (2016)** Dietary nitrogen alters codon bias and genome composition in parasitic microorganisms. **_Genome Biology_** 17(1):226.
 
@@ -21,7 +21,7 @@ The **_CodonMuSe_** implementation of the SK model was first published in:
 **Seward EA, Kelly S (in prep.)** The evolutionary economics of a gene, bacteria balance the cost and efficiency of mRNA.
 
 ## Installing _CodonMuSe_
-**_CodonMuSe_** is written in python and requires **scipy**. Up-to-date instructions on how to install **scipy** are provided here: http://www.scipy.org/install.html. Once **scipy** is installed, the **_CodonMuSe_** source code can be downloaded from this repository by clicking the _Clone or download_ link at the top of the page and executed directly as described below.
+CodonMuSe is written in python and requires **scipy**. Up-to-date instructions on how to install scipy are provided here: http://www.scipy.org/install.html. Once scipy is installed, the CodonMuSe source code can be downloaded from this repository by clicking the _Clone or download_ link at the top of the page and executed directly as described below.
 
 
 ## Running _CodonMuSe_
@@ -39,7 +39,7 @@ The **_CodonMuSe_** implementation of the SK model was first published in:
 
 ## Input Files
 
-Two input files are required to run **_CodonMuSe_** 
+Two input files are required to run CodonMuSe
 
 **1) A FASTA file containing nucleotide sequences for protein coding genes**
 
@@ -68,11 +68,11 @@ This file contains the results of analysing each individual gene's percentage op
 
 **\<SEQUENCE FILE\>__tRNAscan_errors.txt**
 
-This file contains information about any tRNAs that were not used in the **_CodonMuse_** analysis. For example tRNAscan identifies pseudogenes (_pseudo_) and tRNAs for Seleno cystein (_SeC_) that are not used by **_CodonMuse_**.
+This file contains information about any tRNAs that were not used in the CodonMuse analysis. For example tRNAscan identifies pseudogenes (_pseudo_) and tRNAs for Seleno cystein (_SeC_) that are not used by CodonMuse.
 
 **\<SEQUENCE FILE\>__excluded_sequences.txt**
 
-This file contains information about any sequences that were not used in the **_CodonMuse_** analysis. For example very shot genes (\<30nt), genes lacking start codons, genes lacking stop codons, and genes with frame errors are not analysed by **_CodonMuse_**.
+This file contains information about any sequences that were not used in the CodonMuse analysis. For example very shot genes (\<30nt), genes lacking start codons, genes lacking stop codons, and genes with frame errors are not analysed by **_CodonMuse_**.
 
 ## Example Dataset
 
