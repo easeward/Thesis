@@ -182,6 +182,8 @@ def Genome_wide_analysis(CDS_file):
 		elif protein_count[codon_trans_standard[codon]] !=0:
 			relative_codon_use[codon] = 0
 			f2.write(codon+" isn't used once in the whole fasta file, is this odd?\n")
+		else:
+			relative_codon_use[codon] = 0
 	log_likelihood = float(0)
 	for codon in relative_codon_use:
 		probability = float(relative_codon_use[codon])
@@ -805,25 +807,20 @@ def run_pareto_optimisation():
 		cost = float(cost - min_cost)/(max_cost - min_cost)
 		translatability = float(translatability - min_trans)/(max_trans - min_trans)
 		i = 0
-		distance = []
+		d1_distance = []
 		while (i < len(cost_frontier)):
-			distance.append(math.sqrt((cost - cost_frontier[i])*(cost - cost_frontier[i]) + (translatability  - trans_frontier[i])*(translatability  - trans_frontier[i])))
+			d1_distance.append(math.sqrt((cost - cost_frontier[i])*(cost - cost_frontier[i]) + (translatability  - trans_frontier[i])*(translatability  - trans_frontier[i])))
 			i += 1
-		d1 = min(distance)
-		d2 = (math.sqrt((cost - cost_frontier[0])*(cost - cost_frontier[0]) + (translatability - trans_frontier[0])*(translatability - trans_frontier[0])))
-		d3 = (math.sqrt((cost - cost_frontier[-1])*(cost - cost_frontier[-1]) + (translatability - trans_frontier[-1])*(translatability - trans_frontier[-1])))
-		i = 0
+		d1 = min(d1_distance)
 		i = 0
 		distance = []
 		while (i < len(cost_frontier_worst)):
 			distance.append(math.sqrt((cost - cost_frontier_worst[i])*(cost - cost_frontier_worst[i]) + (translatability  - trans_frontier_worst[i])*(translatability  - trans_frontier_worst[i])))
 			i += 1
 		d4 = min(distance)
-		d5 = (math.sqrt((cost - cost_frontier_worst[-1])*(cost - cost_frontier_worst[-1]) + (translatability - trans_frontier_worst[-1])*(translatability - trans_frontier_worst[-1])))
-		d6 = (math.sqrt((cost - cost_frontier_worst[0])*(cost - cost_frontier_worst[0]) + (translatability - trans_frontier_worst[0])*(translatability - trans_frontier_worst[0])))
 		Both_optimised = float(d4*100)/(d1 + d4)
-		Cost_optimised = float(d5*100)/(d2 + d5)
-		tAI_optimised = float(d6*100)/(d3 + d6)
+		Cost_optimised = float((1-cost)*100) #This is cost optimisation not relative cost ie. a relative cost of 1 would be the worst optimised.
+		tAI_optimised = float(translatability*100)
 		Both_optimised = round(Both_optimised, 2)
 		Cost_optimised = round(Cost_optimised, 2)
 		tAI_optimised = round(tAI_optimised, 2)
