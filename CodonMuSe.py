@@ -153,7 +153,7 @@ def Genome_wide_analysis(CDS_file):
 							codon = codon + letter
 				else:
 					if len(line)<=30:
-						f2.write(acc+" is "+len(line)+"bp long ie.< 30bp\n")
+						f2.write(acc+" is "+str(len(line))+"bp long ie.< 30bp\n")
 					elif len(line)%3 != 0:
 						f2.write(acc+" is not divisible by 3 (possible frame shift error)\n")
 					elif codon_trans_standard[line[len(line) - 3:]] != "B":
