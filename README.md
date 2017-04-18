@@ -72,7 +72,7 @@ This file contains information about any tRNAs that were not used in the CodonMu
 
 **\<SEQUENCE FILE\>__excluded_sequences.txt**
 
-This file contains information about any sequences that were not used in the CodonMuse analysis. For example very shot genes (\<30nt), genes lacking start codons, genes lacking stop codons, and genes with frame errors are not analysed by **_CodonMuse_**.
+This file contains information about any sequences that were not used in the CodonMuse analysis. For example very shot genes (\<30nt), genes lacking start codons, genes lacking stop codons, and genes with frame errors are not analysed by CodonMuse.
 
 ## Example Dataset
 
