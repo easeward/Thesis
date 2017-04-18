@@ -16,7 +16,7 @@ CodonMuSe implements the SK model for inferring the impact on **Codon** bias of 
 
 **Seward EA, Kelly S (2016)** Dietary nitrogen alters codon bias and genome composition in parasitic microorganisms. **_Genome Biology_** 17(1):226.
 
-The **_CodonMuSe_** implementation of the SK model was first published in:
+The CodonMuSe implementation of the SK model was first published in:
 
 **Seward EA, Kelly S (in prep.)** The evolutionary economics of a gene, bacteria balance the cost and efficiency of mRNA.
 
