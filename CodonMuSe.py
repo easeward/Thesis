@@ -32,10 +32,10 @@ else:
 	print "This software is distributed under the Univeristy of Oxford Academic Use\nLicence. For details please see the License.md that came with this software.\n"
 	print "Usage:\npython CodonMuSe.py [options] -f <sequence file> -tscan <tRNAscan file>\n"	
 	print "Options:"
-	print "  -f <FILE>     A FASTA file of protein coding nucleotide seqeunces"
+	print "  -f <FILE>     A FASTA file of protein coding nucleotide sequences"
 	print "  -tscan <FILE> A tRNA copy number file produced by tRNAscan"
 	print "  -tc <INT>     The NCBI genetic code identifier goo.gl/ByQOau (Default = 1)"
-	print "  -ind          Analysed individual genes in adition to a genomewide analysis"
+	print "  -ind          Analysed individual genes in addition to a genomewide analysis"
 	print "  -fix_mb       Fix mutation bias to genome-wide value for individual genes"
 	print "  -par          Determine cost and efficiency optimality of individual genes"
 	print "  -m <TXT>      Specify model parameters (Mb, Sc, St) eg. Mb_Sc_St or Mb_Sc"
@@ -121,6 +121,9 @@ def Genome_wide_analysis(CDS_file):
 	codon = ""
 	sequence_count = 0
 	bad_sequence_count = 0
+	global cds_filtered
+	cds = {}
+	cds_filtered = {}
 	print "Reading sequence file"
 	with open(CDS_file) as CDSfile:
 		for line in CDSfile:
@@ -129,40 +132,46 @@ def Genome_wide_analysis(CDS_file):
 				empty = 0
 			elif line[0] == ">":
 				acc = line[1:]
+				cds[acc] = []
 			else:
 				line = line.upper()
-				temp = line.replace("A", "")
-				temp = temp.replace("T", "")
-				temp = temp.replace("C", "")
-				temp = temp.replace("G", "")
-				if len(temp) > 0:
-					f2.write(acc+" contains "+temp+" ie. letters that aren't ATCG\n")
-					bad_sequence_count = bad_sequence_count + 1
-				elif line[0:3] in start_codons and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
-					sequence_count = sequence_count + 1
-					p = 1
-					for letter in line:
-						if p % 3 == 0:
-							p += 1
-							codon = codon + letter
-							codon_count[codon] = codon_count[codon] + 1
-							protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1
-							codon = ""
-						else:
-							p += 1
-							codon = codon + letter
+				cds[acc].append(line)
+	for acc in cds:
+		line = ''.join(cds[acc])
+		temp = line.replace("A", "")
+		temp = temp.replace("T", "")
+		temp = temp.replace("C", "")
+		temp = temp.replace("G", "")
+		if len(temp) > 0:
+			f2.write(acc+" contains "+temp+" ie. letters that aren't ATCG\n")
+			bad_sequence_count = bad_sequence_count + 1
+		elif line[0:3] in start_codons and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
+			cds_filtered[acc] = line
+			sequence_count = sequence_count + 1
+			p = 1
+			for letter in line:
+				if p % 3 == 0:
+					p += 1
+					codon = codon + letter
+					codon_count[codon] = codon_count[codon] + 1
+					protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1
+					codon = ""
 				else:
-					if len(line)<=30:
-						f2.write(acc+" is "+str(len(line))+"bp long ie.< 30bp\n")
-					elif len(line)%3 != 0:
-						f2.write(acc+" is not divisible by 3 (possible frame shift error)\n")
-					elif codon_trans_standard[line[len(line) - 3:]] != "B":
-						f2.write(acc+" has no stop codon\n")
-					elif line[0:3] not in start_codons:
-						f2.write(acc+"\t"+str(line[0:3])+" is not a start codon\n")
-					else:
-						f2.write(acc+" has been excluded for mysterious reasons. Check why manually.\n")
-					bad_sequence_count = bad_sequence_count + 1
+					p += 1
+					codon = codon + letter
+		else:
+			if len(line)<=30:
+				f2.write(acc+" is "+str(len(line))+"bp long ie.< 30bp\n")
+			elif len(line)%3 != 0:
+				f2.write(acc+" is not divisible by 3 (possible frame shift error)\n")
+			elif codon_trans_standard[line[len(line) - 3:]] != "B":
+				f2.write(acc+" has no stop codon\n")
+			elif line[0:3] not in start_codons:
+				f2.write(acc+"\t"+str(line[0:3])+" is not a start codon\n")
+			else:
+				f2.write(acc+" has been excluded for mysterious reasons. Check why manually.\n")
+			bad_sequence_count = bad_sequence_count + 1
+	del cds
 	global relative_codon_use
 	relative_codon_use = {}
 	total_codons = 0
@@ -282,76 +291,64 @@ def per_gene_analysis(CDS_file, best_model):
 	print "Analysing individual genes. This takes ~ 1 second per gene.\n"
 	f1=open(species+"_IndividualGenesResults.txt", "w")
 	f1.write("Accession\tLog_likelihood\tMb\tSc\tSt")
-	with open(CDS_file) as CDSfile:
-		try:
-			get_tAI_values(tSCAN_file)
-		except NameError:
-			print "You really should have a tRNAscan file for better results\n"
-		for line in CDSfile:
-			line = str(line.rstrip().strip())
-			if line == "":
-				empty = 0
-			elif line[0] == ">":
-				acc = line[1:]
-				global codon_count
-				codon_count = {}
-				protein_count = {}
-				for key in codon_trans_standard:
-					codon_count[key] = 0
-				for key in proteins:
-					protein_count[key] = 0;
+	try:
+		get_tAI_values(tSCAN_file)
+	except NameError:
+		print "You really should have a tRNAscan file for better results\n"
+	for acc in cds_filtered:
+		global codon_count
+		codon_count = {}
+		protein_count = {}
+		for key in codon_trans_standard:
+			codon_count[key] = 0
+		for key in proteins:
+			protein_count[key] = 0;
+		codon = ""
+		line = cds_filtered[acc]
+		p = 1
+		for letter in line:
+			if p % 3 == 0:
+				p += 1
+				codon = codon + letter	
+				codon_count[codon] = codon_count[codon] + 1
+				protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1 #print "%d %s %d %s" %(codon_count[codon], codon, protein_count[codon_trans_standard[codon]], codon_trans_standard[codon])
 				codon = ""
 			else:
-				line = line.upper()
-				temp = line.replace("A", "")
-				temp = temp.replace("T", "")
-				temp = temp.replace("C", "")
-				temp = temp.replace("G", "")
-				if len(temp) == 0 and line[0:3] in start_codons and codon_trans_standard[line[len(line) - 3:]] == "B" and len(line)%3 == 0 and len(line)>30:
-					p = 1
-					for letter in line:
-						if p % 3 == 0:
-							p += 1
-							codon = codon + letter	
-							codon_count[codon] = codon_count[codon] + 1
-							protein_count[codon_trans_standard[codon]] = protein_count[codon_trans_standard[codon]] + 1 #print "%d %s %d %s" %(codon_count[codon], codon, protein_count[codon_trans_standard[codon]], codon_trans_standard[codon])
-							codon = ""
-						else:
-							p += 1
-							codon = codon + letter
-					global relative_codon_use
-					relative_codon_use = {}
-					for codon in codon_trans_standard:
-						if codon_count[codon] != 0:
-							relative_codon_use[codon] = "%.4f" %(float(codon_count[codon])/protein_count[codon_trans_standard[codon]])
-						elif protein_count[codon_trans_standard[codon]] !=0:
-							relative_codon_use[codon] = 0
-					likelihood = float(0)
-					for codon in relative_codon_use:
-						probability = float(relative_codon_use[codon])
-						if probability == 0:
-							probability = 0.000000000001
-						probability = math.log(probability)
-						likelihood = likelihood + probability*codon_count[codon]
-					final_likelihood = "%.2f" %(likelihood)
-					res_model, likelihood_model, r2_model = get_math_function(best_model, 0, 0, 0, 0)
-					r2_model = round(r2_model, 4)
-					likelihood_model = round(likelihood_model, 1)
-					if ('Mb' in best_model):
-						res_model[0] = round(res_model[0], 4)
-						if fixed_Mb != 'moveable':
-							res_model[0] = round(fixed_Mb, 4)
-					else:
-						res_model[0] = 0
-					if ('Sc' in best_model):
-						res_model[1] = round(res_model[1], 4)
-					else:
-						res_model[1] = 0
-					if ('St' in best_model):
-						res_model[2] = round(res_model[2], 4)
-					else:
-						res_model[2] = 0
-					f1.write("\n"+acc+"\t"+str(likelihood_model)+"\t"+str(res_model[0])+"\t"+str(res_model[1])+"\t"+str(res_model[2]))
+				p += 1
+				codon = codon + letter
+		global relative_codon_use
+		relative_codon_use = {}
+		for codon in codon_trans_standard:
+			if codon_count[codon] != 0:
+				relative_codon_use[codon] = "%.4f" %(float(codon_count[codon])/protein_count[codon_trans_standard[codon]])
+			elif protein_count[codon_trans_standard[codon]] !=0:
+				relative_codon_use[codon] = 0
+		likelihood = float(0)
+		for codon in relative_codon_use:
+			probability = float(relative_codon_use[codon])
+			if probability == 0:
+				probability = 0.000000000001
+			probability = math.log(probability)
+			likelihood = likelihood + probability*codon_count[codon]
+		final_likelihood = "%.2f" %(likelihood)
+		res_model, likelihood_model, r2_model = get_math_function(best_model, 0, 0, 0, 0)
+		r2_model = round(r2_model, 4)
+		likelihood_model = round(likelihood_model, 1)
+		if ('Mb' in best_model):
+			res_model[0] = round(res_model[0], 4)
+			if fixed_Mb != 'moveable':
+				res_model[0] = round(fixed_Mb, 4)
+		else:
+			res_model[0] = 0
+		if ('Sc' in best_model):
+			res_model[1] = round(res_model[1], 4)
+		else:
+			res_model[1] = 0
+		if ('St' in best_model):
+			res_model[2] = round(res_model[2], 4)
+		else:
+			res_model[2] = 0
+		f1.write("\n"+acc+"\t"+str(likelihood_model)+"\t"+str(res_model[0])+"\t"+str(res_model[1])+"\t"+str(res_model[2]))
 	f1.close()
 
 def get_math_function(model_type, start_Mb, start_Ns, start_Te, start_Es):
@@ -710,139 +707,127 @@ def run_pareto_optimisation():
 	get_tAI_values(tSCAN_file)
 	f1=open(species+"_OptimisationResults.txt", "w")
 	f1.write("Accession\t%Both_optimised\t%Cost_optimised\t%tAI_optimised\n")
-	with open(CDS_file) as CDSfile:
-		for sequence in CDSfile:
-			sequence = str(sequence.rstrip().strip())
-			if sequence == "":
-				empty = 0
-			elif sequence[0] == ">":
-				acc = sequence[1:]
+	for acc in cds_filtered:
+		sequence = cds_filtered[acc]
+		codon = ""
+		amino_seq = []
+		cost = 0
+		translatability = 0
+		line = {}
+		number = 0
+		options = []
+		column = 0
+		p = 1
+		for letter in sequence:
+			if p % 3 == 0:
+				p += 1
+				codon = codon + letter
+				if codon_trans_standard[codon] != 'B':
+					amino_seq.append(codon_trans_standard[codon])
+					column += 1
+					cost = cost + N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]]
+					translatability = translatability + tAI_value[codon]
+					line[number] = proteins[codon_trans_standard[codon]]
+					options.append(len(line[number]))
+					number += 1
+				codon = ""
 			else:
-				sequence = sequence.upper()
-				temp = sequence.replace("A", "")
-				temp = temp.replace("T", "")
-				temp = temp.replace("C", "")
-				temp = temp.replace("G", "")
-				if len(temp) == 0 and sequence[0:3] in start_codons and codon_trans_standard[sequence[len(sequence) - 3:]] == "B" and len(sequence)%3 == 0 and len(sequence)>30:
-					codon = ""
-					amino_seq = []
-					cost = 0
-					translatability = 0
-					line = {}
-					number = 0
-					options = []
-					column = 0
-					p = 1
-					for letter in sequence:
-						if p % 3 == 0:
-							p += 1
-							codon = codon + letter
-							if codon_trans_standard[codon] != 'B':
-								amino_seq.append(codon_trans_standard[codon])
-								column += 1
-								cost = cost + N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]]
-								translatability = translatability + tAI_value[codon]
-								line[number] = proteins[codon_trans_standard[codon]]
-								options.append(len(line[number]))
-								number += 1
-							codon = ""
-						else:
-							p += 1
-							codon = codon + letter
-					i = 0
-					cost_frontier = []
-					trans_frontier = []
-					while (i < len(line)):
-						opts = line[i]
-						cost_array = []
-						trans_array = []
-						for codon in opts:
-							cost_array.append(N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]])
-							trans_array.append(tAI_value[codon])
-						temp_frontier_cost = []
-						temp_frontier_trans = []
-						if len(cost_frontier) == 0:
-							temp_frontier_cost = cost_array
-							temp_frontier_trans = trans_array
-						else:
-							for costy in cost_frontier:
-								for extra_cost in cost_array:
-									temp_frontier_cost.append(costy+extra_cost)
-							for trans in trans_frontier:
-								for extra_trans in trans_array:
-									temp_frontier_trans.append(trans+extra_trans)
-						cost_frontier, trans_frontier = pareto_frontier(temp_frontier_cost, temp_frontier_trans, maxX = False, maxY = True)
-						i += 1
-					i = 0
-					cost_frontier = np.array(cost_frontier)
-					trans_frontier = np.array(trans_frontier)
-					min_cost = min(cost_frontier)
-					max_cost = max(cost_frontier)
-					min_trans = min(trans_frontier)
-					max_trans = max(trans_frontier)
-					cost_frontier_worst = []
-					trans_frontier_worst = []
-					while (i < len(line)):
-						opts = line[i]
-						cost_array = []
-						trans_array = []
-						for codon in opts:
-							cost_array.append(N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]])
-							trans_array.append(tAI_value[codon])
-						temp_frontier_cost = []
-						temp_frontier_trans = []
-						if len(cost_frontier_worst) == 0:
-							temp_frontier_cost = cost_array
-							temp_frontier_trans = trans_array
-						else:
-							for costy in cost_frontier_worst:
-								for extra_cost in cost_array:
-									temp_frontier_cost.append(costy+extra_cost)
-							for trans in trans_frontier_worst:
-								for extra_trans in trans_array:
-									temp_frontier_trans.append(trans+extra_trans)
-						cost_frontier_worst, trans_frontier_worst = pareto_frontier(temp_frontier_cost, temp_frontier_trans, maxX = True, maxY = False)
-						i += 1
-					cost_frontier_worst = np.array(cost_frontier_worst)
-					trans_frontier_worst = np.array(trans_frontier_worst)
-					if min_cost > min(cost_frontier_worst):
-						min_cost = min(cost_frontier_worst)
-					if max_cost < max(cost_frontier_worst):
-						max_cost = max(cost_frontier_worst)
-					if min_trans > min(trans_frontier_worst):
-						min_trans = min(trans_frontier_worst)
-					if max_trans < max(trans_frontier_worst):
-						max_trans = max(trans_frontier_worst)
-					cost_frontier_worst = (cost_frontier_worst - min_cost)/float(max_cost - min_cost)
-					trans_frontier_worst = (trans_frontier_worst - min_trans)/float(max_trans - min_trans)
-					cost_frontier = (cost_frontier - min_cost)/float(max_cost - min_cost)
-					trans_frontier = (trans_frontier - min_trans)/float(max_trans - min_trans)
-					cost = float(cost - min_cost)/(max_cost - min_cost)
-					translatability = float(translatability - min_trans)/(max_trans - min_trans)
-					i = 0
-					distance = []
-					while (i < len(cost_frontier)):
-						distance.append(math.sqrt((cost - cost_frontier[i])*(cost - cost_frontier[i]) + (translatability  - trans_frontier[i])*(translatability  - trans_frontier[i])))
-						i += 1
-					d1 = min(distance)
-					d2 = (math.sqrt((cost - cost_frontier[0])*(cost - cost_frontier[0]) + (translatability - trans_frontier[0])*(translatability - trans_frontier[0])))
-					d3 = (math.sqrt((cost - cost_frontier[-1])*(cost - cost_frontier[-1]) + (translatability - trans_frontier[-1])*(translatability - trans_frontier[-1])))
-					i = 0
-					i = 0
-					distance = []
-					while (i < len(cost_frontier_worst)):
-						distance.append(math.sqrt((cost - cost_frontier_worst[i])*(cost - cost_frontier_worst[i]) + (translatability  - trans_frontier_worst[i])*(translatability  - trans_frontier_worst[i])))
-						i += 1
-					d4 = min(distance)
-					d5 = (math.sqrt((cost - cost_frontier_worst[-1])*(cost - cost_frontier_worst[-1]) + (translatability - trans_frontier_worst[-1])*(translatability - trans_frontier_worst[-1])))
-					d6 = (math.sqrt((cost - cost_frontier_worst[0])*(cost - cost_frontier_worst[0]) + (translatability - trans_frontier_worst[0])*(translatability - trans_frontier_worst[0])))
-					Both_optimised = float(d4*100)/(d1 + d4)
-					Cost_optimised = float(d5*100)/(d2 + d5)
-					tAI_optimised = float(d6*100)/(d3 + d6)
-					Both_optimised = round(Both_optimised, 2)
-					Cost_optimised = round(Cost_optimised, 2)
-					tAI_optimised = round(tAI_optimised, 2)
-					f1.write(acc+"\t"+str(Both_optimised)+"\t"+str(Cost_optimised)+"\t"+str(tAI_optimised)+"\n")
+				p += 1
+				codon = codon + letter
+		i = 0
+		cost_frontier = []
+		trans_frontier = []
+		while (i < len(line)):
+			opts = line[i]
+			cost_array = []
+			trans_array = []
+			for codon in opts:
+				cost_array.append(N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]])
+				trans_array.append(tAI_value[codon])
+			temp_frontier_cost = []
+			temp_frontier_trans = []
+			if len(cost_frontier) == 0:
+				temp_frontier_cost = cost_array
+				temp_frontier_trans = trans_array
+			else:
+				for costy in cost_frontier:
+					for extra_cost in cost_array:
+						temp_frontier_cost.append(costy+extra_cost)
+				for trans in trans_frontier:
+					for extra_trans in trans_array:
+						temp_frontier_trans.append(trans+extra_trans)
+			cost_frontier, trans_frontier = pareto_frontier(temp_frontier_cost, temp_frontier_trans, maxX = False, maxY = True)
+			i += 1
+		i = 0
+		cost_frontier = np.array(cost_frontier)
+		trans_frontier = np.array(trans_frontier)
+		min_cost = min(cost_frontier)
+		max_cost = max(cost_frontier)
+		min_trans = min(trans_frontier)
+		max_trans = max(trans_frontier)
+		cost_frontier_worst = []
+		trans_frontier_worst = []
+		while (i < len(line)):
+			opts = line[i]
+			cost_array = []
+			trans_array = []
+			for codon in opts:
+				cost_array.append(N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]])
+				trans_array.append(tAI_value[codon])
+			temp_frontier_cost = []
+			temp_frontier_trans = []
+			if len(cost_frontier_worst) == 0:
+				temp_frontier_cost = cost_array
+				temp_frontier_trans = trans_array
+			else:
+				for costy in cost_frontier_worst:
+					for extra_cost in cost_array:
+						temp_frontier_cost.append(costy+extra_cost)
+				for trans in trans_frontier_worst:
+					for extra_trans in trans_array:
+						temp_frontier_trans.append(trans+extra_trans)
+			cost_frontier_worst, trans_frontier_worst = pareto_frontier(temp_frontier_cost, temp_frontier_trans, maxX = True, maxY = False)
+			i += 1
+		cost_frontier_worst = np.array(cost_frontier_worst)
+		trans_frontier_worst = np.array(trans_frontier_worst)
+		if min_cost > min(cost_frontier_worst):
+			min_cost = min(cost_frontier_worst)
+		if max_cost < max(cost_frontier_worst):
+			max_cost = max(cost_frontier_worst)
+		if min_trans > min(trans_frontier_worst):
+			min_trans = min(trans_frontier_worst)
+		if max_trans < max(trans_frontier_worst):
+			max_trans = max(trans_frontier_worst)
+		cost_frontier_worst = (cost_frontier_worst - min_cost)/float(max_cost - min_cost)
+		trans_frontier_worst = (trans_frontier_worst - min_trans)/float(max_trans - min_trans)
+		cost_frontier = (cost_frontier - min_cost)/float(max_cost - min_cost)
+		trans_frontier = (trans_frontier - min_trans)/float(max_trans - min_trans)
+		cost = float(cost - min_cost)/(max_cost - min_cost)
+		translatability = float(translatability - min_trans)/(max_trans - min_trans)
+		i = 0
+		distance = []
+		while (i < len(cost_frontier)):
+			distance.append(math.sqrt((cost - cost_frontier[i])*(cost - cost_frontier[i]) + (translatability  - trans_frontier[i])*(translatability  - trans_frontier[i])))
+			i += 1
+		d1 = min(distance)
+		d2 = (math.sqrt((cost - cost_frontier[0])*(cost - cost_frontier[0]) + (translatability - trans_frontier[0])*(translatability - trans_frontier[0])))
+		d3 = (math.sqrt((cost - cost_frontier[-1])*(cost - cost_frontier[-1]) + (translatability - trans_frontier[-1])*(translatability - trans_frontier[-1])))
+		i = 0
+		i = 0
+		distance = []
+		while (i < len(cost_frontier_worst)):
+			distance.append(math.sqrt((cost - cost_frontier_worst[i])*(cost - cost_frontier_worst[i]) + (translatability  - trans_frontier_worst[i])*(translatability  - trans_frontier_worst[i])))
+			i += 1
+		d4 = min(distance)
+		d5 = (math.sqrt((cost - cost_frontier_worst[-1])*(cost - cost_frontier_worst[-1]) + (translatability - trans_frontier_worst[-1])*(translatability - trans_frontier_worst[-1])))
+		d6 = (math.sqrt((cost - cost_frontier_worst[0])*(cost - cost_frontier_worst[0]) + (translatability - trans_frontier_worst[0])*(translatability - trans_frontier_worst[0])))
+		Both_optimised = float(d4*100)/(d1 + d4)
+		Cost_optimised = float(d5*100)/(d2 + d5)
+		tAI_optimised = float(d6*100)/(d3 + d6)
+		Both_optimised = round(Both_optimised, 2)
+		Cost_optimised = round(Cost_optimised, 2)
+		tAI_optimised = round(tAI_optimised, 2)
+		f1.write(acc+"\t"+str(Both_optimised)+"\t"+str(Cost_optimised)+"\t"+str(tAI_optimised)+"\n")
 	f1.close()
 
 global fixed_Mb
@@ -859,3 +844,4 @@ if "-par" in sys.argv:
 	run_pareto_optimisation()
 	
 print "CodonMuSe (1) implements the SK model (2).\nWhen publishing work that uses CodonMuSe please cite both:\n(1) Seward EA and Kelly S (2017) bioRxiv doi.org/XX.XXXX/XXXXXX\n(2) Seward EA and Kelly S (2016) Genome Biology 17(1):226\n"
+	
