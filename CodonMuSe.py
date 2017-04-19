@@ -200,7 +200,7 @@ def Genome_wide_analysis(CDS_file):
 		Options = ['Mb', 'Sc']
 	print "Analysing whole genome sequence data (<1 min)"
 	if model_fix == "find":
-		print "Finding best model to use for this data set\nModel\t\t-LnL\tdf\tAIC\tBIC\n"
+		print "Finding best model to use for this data set\nModel\t\t-LnL\tdf\tAIC\tBIC"
 		f1.write("Testing different model parameters for best fit:\nModel\t-LnL\tdf\tAIC\tBIC\n")
 		#AIC = 2k - 2ln(L) # minimum AIC is best
 		best_log_likelihood = 10000000000000000000
@@ -258,7 +258,7 @@ def Genome_wide_analysis(CDS_file):
 				j = j + 1
 			i = i + 1
 		model_used = best.replace("_", "+")
-		print "%s is the best fitting model\n" %(model_used)
+		print "%s is the best fitting model" %(model_used)
 	else:
 		if 'Mb' in model_fix and 'Sc' in model_fix and 'St' in model_fix:
 			number_para = 3
