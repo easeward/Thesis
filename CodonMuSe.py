@@ -200,10 +200,12 @@ def Genome_wide_analysis(CDS_file):
 		Options = ['Mb', 'Sc']
 	print "Analysing whole genome sequence data (<1 min)"
 	if model_fix == "find":
-		print "Finding best model to use for this data set\n"
+		print "Finding best model to use for this data set\nModel\t\t-LnL\tdf\tAIC\tBIC\n"
+		f1.write("Testing different model parameters for best fit:\nModel\t-LnL\tdf\tAIC\tBIC\n")
 		#AIC = 2k - 2ln(L) # minimum AIC is best
 		best_log_likelihood = 10000000000000000000
 		AIC = 10000000000000000000
+		log_number_data_points = math.log(total_codons)
 		best = ''
 		i = 0
 		while i < len(Options):
@@ -212,6 +214,12 @@ def Genome_wide_analysis(CDS_file):
 			number_para = 1
 			res_model, log_likelihood_model, r2_model = get_math_function(model, 0, 0, 0, 0)
 			AIC_model = (2*number_para)-(2*(log_likelihood_model))
+			BIC = log_number_data_points*number_para - (2*log_likelihood_model)
+			log_likelihood_model = round(log_likelihood_model, 1)
+			AIC_model = round(AIC_model,1)
+			BIC = round(BIC, 1)
+			print "%s\t\t%s\t%s\t%s\t%s\n" %(model, -log_likelihood_model, number_para, AIC_model, BIC)
+			f1.write(model+"\t\t\t"+str(-log_likelihood_model)+"\t"+str(number_para)+"\t"+str(AIC_model)+"\t"+str(BIC)+"\n")
 			if AIC_model < AIC:
 				best_res, best_log_likelihood, best_r2, best, AIC = res_model, log_likelihood_model, r2_model, model, AIC_model
 			j = i + 1
@@ -221,6 +229,12 @@ def Genome_wide_analysis(CDS_file):
 				number_para = 2
 				res_model, log_likelihood_model, r2_model = get_math_function(model, 0, 0, 0, 0)
 				AIC_model = (2*number_para)-(2*(log_likelihood_model))
+				BIC = log_number_data_points*number_para - (2*log_likelihood_model)
+				log_likelihood_model = round(log_likelihood_model, 1)
+				AIC_model = round(AIC_model,1)
+				BIC = round(BIC, 1)
+				print "%s\t\t%s\t%s\t%s\t%s\n" %(model, -log_likelihood_model, number_para, AIC_model, BIC)
+				f1.write(model+"\t\t"+str(-log_likelihood_model)+"\t"+str(number_para)+"\t"+str(AIC_model)+"\t"+str(BIC)+"\n")
 				if AIC_model < AIC:
 					best_res, best_log_likelihood, best_r2, best, AIC = res_model, log_likelihood_model, r2_model, model, AIC_model
 				k = j + 1
@@ -230,6 +244,12 @@ def Genome_wide_analysis(CDS_file):
 					number_para = 3
 					res_model, log_likelihood_model, r2_model = get_math_function(model, 0, 0, 0, 0)
 					AIC_model = (2*number_para)-(2*(log_likelihood_model))
+					BIC = log_number_data_points*number_para - (2*log_likelihood_model)
+					log_likelihood_model = round(log_likelihood_model, 1)
+					AIC_model = round(AIC_model,1)
+					BIC = round(BIC, 1)
+					print "%s\t%s\t%s\t%s\t%s\n" %(model, -log_likelihood_model, number_para, AIC_model, BIC)
+					f1.write(model+"\t"+str(-log_likelihood_model)+"\t"+str(number_para)+"\t"+str(AIC_model)+"\t"+str(BIC)+"\n")
 					if AIC_model < AIC:
 						best_res, best_log_likelihood, best_r2, best, AIC = res_model, log_likelihood_model, r2_model, model, AIC_model
 					k = k + 1
@@ -272,7 +292,8 @@ def Genome_wide_analysis(CDS_file):
 	else:
 		best_res[2] = 0
 	model_used = best.replace("_", "+")
-	f1.write("Genome-wide Results Summary:\nLn_L = "+str(best_log_likelihood)+"\nAIC = "+str(AIC)+"\nR2 = "+str(best_r2)+"\nMutation bias (Mb) = "+str(best_res[0])+"\nSelection on cost (Sc) = "+str(best_res[1])+"\nSelection on translational efficiency (St) = "+str(best_res[2])+"\nModel used = "+model_used+"\n\n")
+	print "%s is model used\n" %(model_used)
+	f1.write("\nGenome-wide Results Summary:\nLnL = "+str(best_log_likelihood)+"\nAIC = "+str(AIC)+"\nR2 = "+str(best_r2)+"\nMutation bias (Mb) = "+str(best_res[0])+"\nSelection on cost (Sc) = "+str(best_res[1])+"\nSelection on translational efficiency (St) = "+str(best_res[2])+"\nModel used = "+model_used+"\n\n")
 	f1.write("Amino acid\tCodon\tObserved frequency\tFitted frequency\n")
 	for aa in proteins:
 		if aa != 'B':
