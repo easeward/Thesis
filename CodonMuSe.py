@@ -5,7 +5,7 @@ Input files must be fastas and in the format genus_species_formatted_CDS.fasta e
 How to input a command:
 python CodonMuSe.py -f Genus_species.fasta -tscan Genus_species_tRNAscan.txt -tc 1 -ind -Mb gw -par
 If you have a tRNAscan you can include it as the second input of the command (as above). With or without the tRNAscan file you can also run
-the script on individual genes (include the command -ind) with or without fixing the mutation_bias of each gene to the global mutation bias (from the formatted_CDS file) by adding -fix_mb.
+the script on individual genes (include the command -ind) with or without fixing the mutation_bias of each gene to the global mutation bias (from the formatted_CDS file) by adding -Mb gw.
 """
 import glob
 import sys
@@ -41,9 +41,9 @@ else:
 	print "  -Mb <float>   Specify a fixed value for Mb in all calculations"
 	print "  -Sc <float>   Specify a fixed value for Sc in all calculations"
 	print "  -St <float>   Specify a fixed value for Sc in all calculations"
-	print "  -Mb gw        Specify genome-wide Mb for individual gene calculations"
-	print "  -Sc gw        Specify genome-wide Sc for individual gene calculations"
-	print "  -St gw        Specify genome-wide St for individual gene calculations"
+	print "  -Mb gw        Fix Mb to genome-wide value for individual genes"
+	print "  -Sc gw        Fix Sc to genome-wide value for individual genes"
+	print "  -St gw        Fix St to genome-wide value for individual genes"
 	print "  -m <TXT>      Specify model parameters (Mb, Sc, St) eg. Mb_Sc_St or Mb_Sc"
 	print "                (Default = determine best parameter combination automatically)\n"
 	print "Citation:";
