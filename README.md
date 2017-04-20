@@ -32,14 +32,13 @@ CodonMuSe is written in python and requires **scipy**. Up-to-date instructions o
 	-tscan <FILE>	A tRNA copy number file produced by tRNAscan
 	-tc <INT>	The NCBI genetic code identifier goo.gl/ByQOau (Default = 1)
 	-ind		Analyse individual genes in addition to a genomewide analysis
-	-fix_mb		Fix mutation bias to genome-wide value for individual genes
 	-par 		Determine the cost and efficiency optimality of individual genes
 	-Mb <float>  	Specify a fixed value for Mb in all calculations
 	-Sc <float>  	Specify a fixed value for Sc in all calculations
 	-St <float>  	Specify a fixed value for Sc in all calculations
-	-Mb gw       	Specify genome-wide Mb for individual gene calculations
-	-Sc gw       	Specify genome-wide Sc for individual gene calculations
-	-St gw       	Specify genome-wide St for individual gene calculations
+	-Mb gw       	Fix Mb (mutation bias) to genome-wide value for individual genes
+	-Sc gw       	Fix Sc (seleciton on cost) to genome-wide value for individual genes
+	-St gw       	Fix St (selection on translational efficiency) to genome-wide value for individual genes
 	-m <TXT>	Specify model parameters (Mb, Sc, St) eg. Mb_Sc_St or Mb_Sc
 	                (Default = determine best parameter combination automatically)
 
