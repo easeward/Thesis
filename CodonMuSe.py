@@ -36,7 +36,6 @@ else:
 	print "  -tscan <FILE> A tRNA copy number file produced by tRNAscan"
 	print "  -tc <INT>     The NCBI genetic code identifier goo.gl/ByQOau (Default = 1)"
 	print "  -ind          Analysed individual genes in addition to a genomewide analysis"
-	print "  -fix_mb       Fix mutation bias to genome-wide value for individual genes"
 	print "  -par          Determine cost and efficiency optimality of individual genes"
 	print "  -Mb <float>   Specify a fixed value for Mb in all calculations"
 	print "  -Sc <float>   Specify a fixed value for Sc in all calculations"
