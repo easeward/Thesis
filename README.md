@@ -34,7 +34,13 @@ CodonMuSe is written in python and requires **scipy**. Up-to-date instructions o
 	-ind		Analyse individual genes in addition to a genomewide analysis
 	-fix_mb		Fix mutation bias to genome-wide value for individual genes
 	-par 		Determine the cost and efficiency optimality of individual genes
-	-m <TXT>	Specify model parameters (Mb, Sc, St) eg. Mb_Sc_St or Mb_Sc 
+	-Mb <float>  	Specify a fixed value for Mb in all calculations
+	-Sc <float>  	Specify a fixed value for Sc in all calculations
+	-St <float>  	Specify a fixed value for Sc in all calculations
+	-Mb gw       	Specify genome-wide Mb for individual gene calculations
+	-Sc gw       	Specify genome-wide Sc for individual gene calculations
+	-St gw       	Specify genome-wide St for individual gene calculations
+	-m <TXT>	Specify model parameters (Mb, Sc, St) eg. Mb_Sc_St or Mb_Sc
 	                (Default = determine best parameter combination automatically)
 
 ## Input Files
@@ -78,5 +84,5 @@ This file contains information about any sequences that were not used in the Cod
 
 An example dataset is provided. To run CodonMuSe on this dataset execute the following command
 
-`CodonMuSe.py -f M_pneumoniae_CDS.fasta -tscan M_pneumoniae_tRNAscan.txt -tc 4 -ind -fix_mb -par -m Mb_Sc_St`
+`CodonMuSe.py -f M_pneumoniae_CDS.fasta -tscan M_pneumoniae_tRNAscan.txt -tc 4 -ind -Mb gw -par -m Mb_Sc_St`
 
