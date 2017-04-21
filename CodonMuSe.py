@@ -891,7 +891,7 @@ def get_linear_relationship_tAI_nitrogen_atoms(File):
 	#f3=open(species+"_tAI_vs_nitrogen_ab.txt", "w")
 	#f3.write("Amino\tCodon\tN_atoms\ttAI\n")
 	for prot in proteins:
-		if prot != 'B': #or 'M' in prot or 'W' in prot
+		if prot != 'B': #and prot != 'M' and prot != 'W':
 			for codon in proteins[prot]:
 				#St_value = tAI_value[codon]
 				#Sc_value = N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]]
