@@ -37,6 +37,7 @@ else:
 	print "  -tc <INT>     The NCBI genetic code identifier goo.gl/ByQOau (Default = 1)"
 	print "  -ind          Analysed individual genes in addition to a genomewide analysis"
 	print "  -par          Determine cost and efficiency optimality of individual genes"
+	print "  -trade        Calculates trade-off between cost and efficiency"
 	print "  -Mb <float>   Specify a fixed value for Mb in all calculations"
 	print "  -Sc <float>   Specify a fixed value for Sc in all calculations"
 	print "  -St <float>   Specify a fixed value for Sc in all calculations"
@@ -878,5 +879,57 @@ if "-ind" in sys.argv:
 	per_gene_analysis(model_to_use)
 if "-par" in sys.argv:
 	run_pareto_optimisation()
+	
+def get_linear_relationship_tAI_nitrogen_atoms(File):
+	print "Calculating the linear relationship between codon cost and efficiency\n"
+	Nit = []
+	Te = []
+	bad_translate = 0
+	f1=open(species+"_tAI_vs_nitrogen_rel.txt", "w")
+	f1.write("Amino\tCodon\tRel_N_atoms\tRel_tAI\n")
+	f2=open("Not_fully_translatable.txt", "w")
+	#f3=open(species+"_tAI_vs_nitrogen_ab.txt", "w")
+	#f3.write("Amino\tCodon\tN_atoms\ttAI\n")
+	for prot in proteins:
+		if prot != 'B': #or 'M' in prot or 'W' in prot
+			for codon in proteins[prot]:
+				#St_value = tAI_value[codon]
+				#Sc_value = N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]]
+				#f3.write(prot+"\t"+codon+"\t"+str(Sc_value)+"\t"+str(St_value)+"\n")
+				overall_nit = []
+				overall_Te = []
+				for syn in proteins[prot]:
+					St_value = tAI_value[syn]
+					overall_Te.append(St_value)
+					Sc_value = N_content[syn[0]] + N_content[syn[1]] + N_content[syn[2]]
+					overall_nit.append(Sc_value)
+				if tAI_value[codon] == 0:
+					St_value = 0
+					print codon, prot
+					f2.write(species_name+"\t"+codon+"\t"+prot+"\n")
+					bad_translate = bad_translate + 1
+				else:
+					St_value = float(tAI_value[codon])/max(overall_Te)
+					St_value = round(St_value, 3)
+				Sc_value = float(N_content[codon[0]] + N_content[codon[1]] + N_content[codon[2]])/max(overall_nit)
+				Sc_value = round(Sc_value,3)
+				Nit.append(Sc_value)
+				Te.append(St_value)
+				f1.write(prot+"\t"+codon+"\t"+str(Sc_value)+"\t"+str(St_value)+"\n")
+	slope, intercept, r_value, p_value, std_err = stats.linregress(Nit,Te)
+	r_squared = r_value*r_value
+	slope = round(slope,3)
+	intercept = round(intercept,3)
+	r_squared = round(r_squared, 3)
+	p_value = round(p_value,3)
+	std_err = round(std_err, 3)
+	f1.write("Species\tSlope\tIntercept\tR_squared\tp_value\tstd_err\n")
+	f1.write(species+"\t"+str(slope)+"\t"+str(intercept)+"\t"+str(r_squared)+"\t"+str(p_value)+"\t"+str(std_err)+"\n")
+	f1.close
+	f2.close
+	#f3.close
+
+if "-trade" in sys.argv:
+	get_linear_relationship_tAI_nitrogen_atoms(tSCAN_file)
 	
 print "CodonMuSe (1) implements the SK model (2).\nWhen publishing work that uses CodonMuSe please cite both:\n(1) Seward EA and Kelly S (2017) bioRxiv doi.org/XX.XXXX/XXXXXX\n(2) Seward EA and Kelly S (2016) Genome Biology 17(1):226\n"
