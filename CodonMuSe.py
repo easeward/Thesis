@@ -284,7 +284,7 @@ def Genome_wide_analysis(CDS_file):
 		else:
 			print "Please input the specified model using the options Mb Sc St separated by _\neg. Mb_Sc_St or Mb_St or Mb etc."
 		print "\nYou have specified model %s which has %d input(s).\n" %(best, number_para)
-		best_res, best_log_likelihood, best_r2 = get_math_function(best, 0, 0, 0, 0)
+		best_res, best_log_likelihood, best_r2 = get_math_function(best, 0, 0, 0)
 		AIC = (2*number_para)-(2*(best_log_likelihood))
 	best_r2 = round(best_r2, 4)
 	AIC = round(AIC, 1)
