@@ -33,6 +33,7 @@ CodonMuSe is written in python and requires **scipy**. Up-to-date instructions o
 	-tc <INT>	The NCBI genetic code identifier goo.gl/ByQOau (Default = 1)
 	-ind		Analyse individual genes in addition to a genomewide analysis
 	-par 		Determine the cost and efficiency optimality of individual genes
+	-trade          Calculates trade-off between cost and efficiency
 	-Mb <float>  	Specify a fixed value for Mb in all calculations
 	-Sc <float>  	Specify a fixed value for Sc in all calculations
 	-St <float>  	Specify a fixed value for Sc in all calculations
