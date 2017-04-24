@@ -906,7 +906,7 @@ def get_linear_relationship_tAI_nitrogen_atoms(File):
 				if tAI_value[codon] == 0:
 					St_value = 0
 					print codon, prot
-					f2.write(species_name+"\t"+codon+"\t"+prot+"\n")
+					f2.write(species+"\t"+codon+"\t"+prot+"\n")
 					bad_translate = bad_translate + 1
 				else:
 					St_value = float(tAI_value[codon])/max(overall_Te)
