@@ -625,15 +625,18 @@ def get_tAI_values(input):
 				else:
 					f3.write(line+" excluded for unknown reason\n")
 			else:
-				tRNA_count = tRNA_count + 1
-				amino_a = symbols[bits[4]]
-				p_index = protein_index[amino_a]
-				ac_index = anti_codon_index[an]
-				#print amino_a, an, p_index, ac_index, anticodons[amino_a], anticodon_count[p_index][ac_index]
-				if complementary_nuc[an[2]]+complementary_nuc[an[1]]+complementary_nuc[an[0]] in codon_trans_standard and an in anticodons[amino_a] and bits[8]>45:
-					anticodon_count[p_index][ac_index] = anticodon_count[p_index][ac_index] + 1
-				else:
-					print line
+				try:
+					tRNA_count = tRNA_count + 1
+					amino_a = symbols[bits[4]]
+					p_index = protein_index[amino_a]
+					ac_index = anti_codon_index[an]
+					#print amino_a, an, p_index, ac_index, anticodons[amino_a], anticodon_count[p_index][ac_index]
+					if complementary_nuc[an[2]]+complementary_nuc[an[1]]+complementary_nuc[an[0]] in codon_trans_standard and an in anticodons[amino_a] and bits[8]>45:
+						anticodon_count[p_index][ac_index] = anticodon_count[p_index][ac_index] + 1
+					else:
+						print line
+				except KeyError:
+					f3.write(line+" includes unknown anticodon so is excluded from the analysis\n")
 	#######
 	p_index = protein_index["I"]
 	ac_index = anti_codon_index["CAT"]
