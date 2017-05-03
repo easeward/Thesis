@@ -82,18 +82,27 @@ This file contains information about any sequences that were not used in the Cod
 
 ## How to interpret the results of CodonMuSe
 **GenomeWideResults & IndividualGenesResults**
+
 Mutation bias (Mb) > 0 : Mutation bias towards GC.
+
 Mutation bias (Mb) < 0 : Mutation bias towards AT.
+
 Selection acting on nucleotide cost (Sc) > 0 : Selection is acting to increase codon nucleotide cost.
+
 Selection acting on nucleotide cost (Sc) < 0 : Selection is acting to decrease codon nucleotide cost.
+
 Selection acting on translational efficiency (St) > 0 : Selection is acting to increase codon codon translational efficiency.
+
 Selection acting on translational efficiency (St) < 0 : Selection is acting to decrease codon codon translational efficiency.
 
 Amino acid and codon observed and fitted frequencies are given as fractions. ie. Alanine (A) might have an observed codon frequency for GCT of 0.16. This means that when alanine is coded for, the GCT is used 16% of the time.
 
 **OptimisationResults**
+
 %Both_optimised : This is the extent to which the given sequence is optimised to both maximise transcript translational efficiency and minimise transcript cost simultaeneously. It takes into account the trade-off between both factors and the distance of the transcript from the Pareto optima which considers both cost and efficiency with equal weight.
+
 %Cost_optimised : This is the extent to which the given sequence is optimised to minimise transcript cost.
+
 %tAI_optimised : This is the extent to which the given sequence is optimised to maximise transcript translational efficiency.
 
 
