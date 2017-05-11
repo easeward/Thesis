@@ -18,7 +18,7 @@ CodonMuSe implements the SK model for inferring the impact on **Codon** bias of 
 
 The CodonMuSe implementation of the SK model was first published in:
 
-**Seward EA, Kelly S (in prep.)** The evolutionary economics of a gene, bacteria balance the cost and efficiency of mRNA.
+**Seward EA, Kelly S (in submission)** Selection-driven cost-efficiency optimisation of transcript sequences determines the rate of gene sequence evolution in bacteria
 
 ## Installing _CodonMuSe_
 CodonMuSe is written in python and requires **scipy**. Up-to-date instructions on how to install scipy are provided here: http://www.scipy.org/install.html. Once scipy is installed, the CodonMuSe source code can be downloaded from this repository by clicking the _Clone or download_ link at the top of the page and executed directly as described below.
