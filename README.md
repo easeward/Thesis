@@ -95,7 +95,7 @@ Selection acting on translational efficiency (St) > 0 : Selection is acting to i
 
 Selection acting on translational efficiency (St) < 0 : Selection is acting to decrease codon translational efficiency.
 
-Amino acid and codon observed and fitted frequencies are given as fractions. ie. Alanine (A) might have an observed codon frequency for GCT of 0.16. This means that when alanine is coded for, the GCT is used 16% of the time.
+Amino acid and codon observed and fitted frequencies are given as fractions. ie. Alanine (A) might have an observed codon frequency for GCT of 0.16. This means that when alanine is coded for GCT is used 16% of the time.
 
 **OptimisationResults**
 
