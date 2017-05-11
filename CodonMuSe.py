@@ -49,7 +49,7 @@ else:
 	print "Citation:";
 	print "CodonMuSe (1) implements the SK model (2)."
 	print "When publishing work that uses CodonMuSe please cite both:"
-	print "(1) Seward EA and Kelly S (2017) bioRxiv doi.org/XX.XXXX/XXXXXX"
+	print "(1) Seward EA and Kelly S (2017) bioRxiv doi.org/10.1101/136861"
 	print "(2) Seward EA and Kelly S (2016) Genome Biology 17(1):226\n"
 
 	exit()
@@ -935,4 +935,4 @@ def get_linear_relationship_tAI_nitrogen_atoms(File):
 if "-trade" in sys.argv:
 	get_linear_relationship_tAI_nitrogen_atoms(tSCAN_file)
 	
-print "CodonMuSe (1) implements the SK model (2).\nWhen publishing work that uses CodonMuSe please cite both:\n(1) Seward EA and Kelly S (2017) bioRxiv doi.org/XX.XXXX/XXXXXX\n(2) Seward EA and Kelly S (2016) Genome Biology 17(1):226\n"
+print "CodonMuSe (1) implements the SK model (2).\nWhen publishing work that uses CodonMuSe please cite both:\n(1) Seward EA and Kelly S (2017) bioRxiv doi.org/10.1101/136861\n(2) Seward EA and Kelly S (2016) Genome Biology 17(1):226\n"
